@@ -51,7 +51,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSyst
 nav { gap: 30px; }
 nav a { transition: color .15s ease; }
 .nav-action { padding: 10px 16px; }
-.hero { min-height: 610px; grid-template-columns: minmax(0, 1fr) minmax(420px, .95fr); gap: clamp(42px, 7vw, 92px); }
+.hero { min-height: 610px; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: clamp(42px, 6vw, 72px); }
 .hero h1 { max-width: 600px; margin-bottom: 24px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(54px, 6.3vw, 78px); font-weight: 500; letter-spacing: -.055em; line-height: .99; }
 .hero-copy { max-width: 530px; color: #505d58; font-size: 17px; line-height: 1.75; }
 .hero-actions { gap: 13px; margin-top: 28px; }
@@ -59,7 +59,7 @@ nav a { transition: color .15s ease; }
 .button-primary { box-shadow: 0 2px 0 rgba(0, 0, 0, .1); }
 .button:focus-visible, a:focus-visible, .link-button:focus-visible, .text-action:focus-visible { outline: 3px solid #bf7447; outline-offset: 3px; }
 .hero-caption { margin: 18px 0 0; color: #77817c; font-size: 12px; }
-.flow-panel { position: relative; padding: 28px 30px 0; overflow: hidden; background: #fffefa; border: 1px solid #d6ddd6; box-shadow: var(--shadow); }
+.flow-panel { position: relative; width: 100%; min-width: 0; padding: 28px 30px 0; overflow: hidden; background: #fffefa; border: 1px solid #d6ddd6; box-shadow: var(--shadow); }
 .flow-panel::before { position: absolute; inset: 0 0 auto; height: 5px; background: var(--forest); content: ''; }
 .flow-panel-head { display: flex; align-items: center; gap: 14px; padding: 6px 0 23px; }
 .flow-panel-head .eyebrow { margin-bottom: 4px; font-size: 10px; }
@@ -92,10 +92,11 @@ nav a { transition: color .15s ease; }
 .portal-main { padding: 46px clamp(22px, 4vw, 54px); }
 .surface, .queue-board { border-color: #d8ded9; box-shadow: 0 6px 22px rgba(24, 59, 51, .045); }
 input, select { border-radius: 3px; }
-@media (max-width: 820px) {
+@media (max-width: 1040px) {
   .shell { width: min(100% - 40px, 680px); }
-  .hero { min-height: unset; padding: 72px 0 76px; gap: 42px; }
+  .hero { min-height: unset; grid-template-columns: minmax(0, 1fr); padding: 72px 0 76px; gap: 42px; }
   .flow-panel { max-width: 620px; }
+  .hero > div:first-child { max-width: 650px; }
   .workflow-grid article { min-height: 175px; }
   .workflow-grid h3 { margin-top: 25px; }
   .workflow-grid article + article { border-top: 1px solid var(--line); border-left: 0; }
