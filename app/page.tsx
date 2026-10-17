@@ -9,20 +9,23 @@ export default function Home() {
         <SiteHeader />
         <section className="hero">
           <div>
-            <p className="eyebrow">For small clinics</p>
-            <h1>Clinic queues, visible as they move.</h1>
-            <p className="hero-copy">Patients can take a token, see a realistic wait estimate, and arrive with context. Your front desk controls the day&apos;s queue from one focused screen.</p>
+            <p className="eyebrow">A clearer clinic visit</p>
+            <h1>Know your place. Plan your visit.</h1>
+            <p className="hero-copy">Queuewise gives patients a token and an estimated wait, while clinic staff manage the day&apos;s queue and doctor sessions from one place.</p>
             <div className="hero-actions">
-              <Link className="button button-primary" href="/register">Create patient account</Link>
-              <Link className="button button-secondary" href="/staff">Open staff console</Link>
+              <Link className="button button-primary" href="/register">Book a clinic token</Link>
+              <Link className="button button-secondary" href="/staff">Staff sign in</Link>
             </div>
+            <p className="hero-caption">For everyday clinic visits. Queuewise is not an emergency service.</p>
           </div>
-          <div className="queue-card" aria-label="Queue example">
-            <div className="queue-card-head"><span>Today&apos;s queue</span><span className="status-serving">Now serving 12</span></div>
-            <div className="queue-row current"><strong>12</strong><span>In consultation</span><time>Started 10:40</time></div>
-            <div className="queue-row"><strong>13</strong><span>Next</span><time>About 10 min</time></div>
-            <div className="queue-row"><strong>14</strong><span>Waiting</span><time>About 20 min</time></div>
-            <p className="queue-note">The real queue updates for everyone when staff takes the next patient.</p>
+          <div className="flow-panel" aria-label="How Queuewise works">
+            <div className="flow-panel-head"><span className="flow-mark" aria-hidden="true" /><div><p className="eyebrow">How it works</p><h2>One shared queue</h2></div></div>
+            <div className="flow-step"><span className="flow-index">01</span><div><h3>Patient books</h3><p>A token is assigned to an available doctor session.</p></div><span className="flow-state">Token issued</span></div>
+            <div className="flow-connector" aria-hidden="true" />
+            <div className="flow-step"><span className="flow-index">02</span><div><h3>Staff advances</h3><p>The front desk calls the next patient and records no-shows.</p></div><span className="flow-state">Staff controlled</span></div>
+            <div className="flow-connector" aria-hidden="true" />
+            <div className="flow-step"><span className="flow-index">03</span><div><h3>Patient follows</h3><p>Queue position and wait estimate update as the queue moves.</p></div><span className="flow-state">Live updates</span></div>
+            <div className="flow-panel-foot"><span>Wait times are estimates</span><span>·</span><span>Clinic data stays private</span></div>
           </div>
         </section>
 

@@ -40,3 +40,83 @@ h3 { font-size: 17px; }
 .legal-page { max-width: 740px; padding: 90px 0; }.legal-page h1 { font-size: 52px; }.legal-page h2 { margin: 42px 0 9px; font-size: 25px; }.legal-page p { color: #485752; }.legal-updated { color: var(--muted) !important; font-size: 13px; }
 @media (max-width: 820px) { .hero, .principles, .portal-grid, .queue-board, .schedule-form { grid-template-columns: 1fr; }.hero { padding: 76px 0; gap: 45px; }.workflow-grid { grid-template-columns: 1fr; }.workflow-grid article { min-height: 0; }.portal-layout { grid-template-columns: 1fr; }.portal-side { min-height: auto; flex-direction: row; align-items: center; justify-content: space-between; }.portal-side p { display: none; }.portal-main { padding: 28px 20px; }.queue-board .now-serving { min-height: 240px; }.legal-page { padding: 65px 0; } }
 @media (max-width: 560px) { .shell { width: min(100% - 28px, 1120px); }.site-header { min-height: 72px; }.site-header nav { gap: 12px; font-size: 12px; }.site-header nav a:nth-child(1) { display: none; }.hero { min-height: 0; }.hero h1 { font-size: 48px; }.queue-row { grid-template-columns: 38px 1fr; }.queue-row time { grid-column: 2; }.principles { gap: 25px; padding: 50px 0; }.site-footer { flex-direction: column; }.portal-title { flex-direction: column; }.portal-title h1 { font-size: 38px; }.control-bar, .schedule-fields { grid-template-columns: 1fr; }.staff-token { grid-template-columns: 52px 1fr; }.staff-token .text-action { grid-column: 2; justify-self: start; }.appointment-card { grid-template-columns: 68px 1fr; } }
+
+/* Queuewise visual system */
+:root { --ink: #202b28; --muted: #626e69; --line: #d8ded9; --paper: #f5f5ef; --surface: #fffefa; --forest: #183b33; --forest-soft: #e5ede8; --clay: #ad562d; --shadow: 0 18px 44px rgba(24, 59, 51, .09); }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.shell { width: min(1160px, calc(100% - 64px)); }
+.site-header { min-height: 88px; border-color: #d5dbd5; }
+.wordmark { gap: 12px; font-size: 19px; letter-spacing: -.04em; }
+.wordmark-mark { width: 14px; height: 14px; box-shadow: 4px 4px 0 var(--clay); }
+nav { gap: 30px; }
+nav a { transition: color .15s ease; }
+.nav-action { padding: 10px 16px; }
+.hero { min-height: 610px; grid-template-columns: minmax(0, 1fr) minmax(420px, .95fr); gap: clamp(42px, 7vw, 92px); }
+.hero h1 { max-width: 600px; margin-bottom: 24px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(54px, 6.3vw, 78px); font-weight: 500; letter-spacing: -.055em; line-height: .99; }
+.hero-copy { max-width: 530px; color: #505d58; font-size: 17px; line-height: 1.75; }
+.hero-actions { gap: 13px; margin-top: 28px; }
+.button { min-height: 48px; padding: 11px 18px; border-radius: 3px; }
+.button-primary { box-shadow: 0 2px 0 rgba(0, 0, 0, .1); }
+.button:focus-visible, a:focus-visible, .link-button:focus-visible, .text-action:focus-visible { outline: 3px solid #bf7447; outline-offset: 3px; }
+.hero-caption { margin: 18px 0 0; color: #77817c; font-size: 12px; }
+.flow-panel { position: relative; padding: 28px 30px 0; overflow: hidden; background: #fffefa; border: 1px solid #d6ddd6; box-shadow: var(--shadow); }
+.flow-panel::before { position: absolute; inset: 0 0 auto; height: 5px; background: var(--forest); content: ''; }
+.flow-panel-head { display: flex; align-items: center; gap: 14px; padding: 6px 0 23px; }
+.flow-panel-head .eyebrow { margin-bottom: 4px; font-size: 10px; }
+.flow-panel-head h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 500; letter-spacing: -.035em; }
+.flow-mark { position: relative; width: 42px; height: 42px; flex: none; border: 1px solid #c8d5ce; background: #183b33; }
+.flow-mark::before, .flow-mark::after { position: absolute; background: #fffefa; content: ''; }
+.flow-mark::before { top: 19px; left: 8px; width: 24px; height: 2px; }
+.flow-mark::after { top: 8px; left: 19px; width: 2px; height: 24px; }
+.flow-step { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 19px 0; border-top: 1px solid #e0e5df; }
+.flow-index { padding-top: 2px; color: var(--clay); font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.flow-step h3 { margin: 0 0 4px; font-size: 15px; font-weight: 750; letter-spacing: -.015em; }
+.flow-step p { max-width: 260px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.flow-state { margin-top: 1px; padding: 4px 7px; border: 1px solid #d6e0d9; color: #31594c; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.flow-connector { display: none; }
+.flow-panel-foot { display: flex; gap: 8px; padding: 13px 0 15px; color: #6f7a75; border-top: 1px solid #e0e5df; font-size: 10px; }
+.workflow-section { padding: 86px 0 90px; border-color: #d5dbd5; }
+.workflow-section > h2, .principles h2 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(32px, 4vw, 43px); font-weight: 500; letter-spacing: -.04em; line-height: 1.1; }
+.workflow-grid { gap: 0; border: 1px solid var(--line); background: var(--surface); }
+.workflow-grid article { min-height: 220px; padding: 25px 27px; background: transparent; border: 0; }
+.workflow-grid article + article { border-left: 1px solid var(--line); }
+.workflow-grid span { font-size: 11px; letter-spacing: .08em; }
+.workflow-grid h3 { margin: 42px 0 9px; font-size: 17px; }
+.workflow-grid p { max-width: 290px; line-height: 1.65; }
+.principles { padding: 74px 0 84px; border-color: #d5dbd5; }
+.principles li { color: #44524c; line-height: 1.6; }
+.principles li::before { width: 8px; height: 8px; top: 24px; }
+.site-footer { padding: 25px 0 34px; border-color: #d5dbd5; }
+.auth-page { min-height: calc(100vh - 150px); padding-top: 110px; }
+.auth-page h1, .legal-page h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; letter-spacing: -.045em; line-height: 1.05; }
+.portal-main { padding: 46px clamp(22px, 4vw, 54px); }
+.surface, .queue-board { border-color: #d8ded9; box-shadow: 0 6px 22px rgba(24, 59, 51, .045); }
+input, select { border-radius: 3px; }
+@media (max-width: 820px) {
+  .shell { width: min(100% - 40px, 680px); }
+  .hero { min-height: unset; padding: 72px 0 76px; gap: 42px; }
+  .flow-panel { max-width: 620px; }
+  .workflow-grid article { min-height: 175px; }
+  .workflow-grid h3 { margin-top: 25px; }
+  .workflow-grid article + article { border-top: 1px solid var(--line); border-left: 0; }
+}
+@media (max-width: 560px) {
+  .shell { width: calc(100% - 32px); }
+  .site-header { min-height: 72px; }
+  .site-header nav { gap: 10px; font-size: 11px; }
+  .site-header nav a:nth-child(2) { display: none; }
+  .nav-action { padding: 8px 10px; }
+  .hero { padding: 54px 0 60px; gap: 36px; }
+  .hero h1 { max-width: 430px; font-size: clamp(48px, 14vw, 64px); }
+  .hero-copy { font-size: 16px; }
+  .hero-actions { align-items: stretch; flex-direction: column; }
+  .hero-actions .button { width: 100%; }
+  .flow-panel { padding: 25px 19px 0; }
+  .flow-step { grid-template-columns: 30px minmax(0, 1fr); gap: 9px; }
+  .flow-state { grid-column: 2; width: fit-content; margin-top: -3px; }
+  .flow-panel-foot { flex-wrap: wrap; }
+  .workflow-section { padding: 58px 0; }
+  .workflow-grid article { min-height: 0; padding: 22px; }
+  .workflow-grid h3 { margin-top: 22px; }
+  .principles { padding: 54px 0; }
+}
