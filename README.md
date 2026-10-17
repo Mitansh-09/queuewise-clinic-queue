@@ -40,7 +40,7 @@ Patients at small clinics often wait without knowing their place in the queue or
 
 ## Architecture
 
-The browser uses Supabase's publishable key only. Sensitive queue operations are implemented as database functions. Each function checks the authenticated user before making a change. The service role key is not used by the application.
+The browser uses Supabase's publishable key only. Sensitive queue operations are implemented as database functions. Each function checks the authenticated user before making a change. Clinic session dates use India Standard Time. The service role key is not used by the application.
 
 ```text
 Patient portal / Staff console

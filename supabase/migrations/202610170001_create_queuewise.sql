@@ -137,9 +137,9 @@ begin
   select * into v_schedule from public.clinic_schedules
   where id = p_schedule_id and clinic_id = p_clinic_id for update;
   if not found then raise exception 'This clinic session is unavailable'; end if;
-  if v_schedule.service_date <> current_date then raise exception 'Tokens can only be booked for today'; end if;
+  if v_schedule.service_date <> (now() at time zone 'Asia/Kolkata')::date then raise exception 'Tokens can only be booked for today'; end if;
   if not v_schedule.accepting_tokens then raise exception 'This clinic is not accepting tokens right now'; end if;
-  if v_schedule.last_token >= v_schedule.capacity then raise exception 'Today\'s token limit has been reached'; end if;
+  if v_schedule.last_token >= v_schedule.capacity then raise exception 'Today''s token limit has been reached'; end if;
   if exists (select 1 from public.appointments where schedule_id = p_schedule_id and patient_id = auth.uid()) then
     raise exception 'You already have a token for this clinic session';
   end if;
@@ -161,10 +161,14 @@ as $$
 declare
   v_previous public.appointments;
   v_next public.appointments;
+  v_schedule public.clinic_schedules;
 begin
   if not exists (select 1 from public.staff_members where clinic_id = p_clinic_id and user_id = auth.uid()) then
     raise exception 'Only clinic staff can advance this queue';
   end if;
+  select * into v_schedule from public.clinic_schedules
+  where id = p_schedule_id and clinic_id = p_clinic_id for update;
+  if not found then raise exception 'This clinic session is unavailable'; end if;
   select * into v_previous from public.appointments
   where schedule_id = p_schedule_id and status = 'serving' for update;
   if found then
@@ -230,7 +234,7 @@ begin
   if not exists (select 1 from public.staff_members where clinic_id = p_clinic_id and user_id = auth.uid()) then
     raise exception 'Only clinic staff can create a schedule';
   end if;
-  if p_service_date < current_date then raise exception 'A schedule cannot be created in the past'; end if;
+  if p_service_date < (now() at time zone 'Asia/Kolkata')::date then raise exception 'A schedule cannot be created in the past'; end if;
   insert into public.clinic_schedules (clinic_id, doctor_name, service_date, opens_at, closes_at, average_minutes, capacity)
   values (p_clinic_id, trim(p_doctor_name), p_service_date, p_opens_at, p_closes_at, p_average_minutes, p_capacity)
   on conflict (clinic_id, service_date, doctor_name) do update set
