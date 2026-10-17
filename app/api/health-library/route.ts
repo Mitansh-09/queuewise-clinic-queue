@@ -42,7 +42,7 @@ function parseTopics(xml: string): Topic[] {
     if (!title) continue
     const sourceText = fields.get('FullSummary')?.[0] || fields.get('snippet')?.[0] || ''
     const sentences = sourceText.match(/[^.!?]+(?:[.!?]+|$)/g) || []
-    const points = sentences.map((sentence) => sentence.trim()).filter(Boolean).slice(0, 3)
+    const points = sentences.map((sentence) => sentence.trim()).filter((sentence) => sentence && !sentence.endsWith('?')).slice(0, 4)
     topics.push({ title, group: fields.get('groupName')?.[0] || 'Health topic', points, url: url.toString() })
     if (topics.length === 5) break
   }

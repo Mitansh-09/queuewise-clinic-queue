@@ -5,10 +5,10 @@ import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 
 const topics = [
-  { name: 'Breast cancer', group: 'Cancer', href: 'https://www.cancer.gov/types/breast', summary: 'Learn about signs and symptoms, risk factors, screening, diagnosis, and treatment from the US National Cancer Institute.' },
-  { name: 'Type 2 diabetes', group: 'Metabolic health', href: 'https://medlineplus.gov/diabetestype2.html', summary: 'Read about the condition, testing, treatment, and day-to-day care from the US National Library of Medicine.' },
-  { name: 'Asthma', group: 'Breathing', href: 'https://medlineplus.gov/asthma.html', summary: 'Explore common symptoms, diagnosis, medicines, and ways to manage asthma.' },
-  { name: 'High blood pressure', group: 'Heart health', href: 'https://medlineplus.gov/highbloodpressure.html', summary: 'Understand blood pressure, possible health effects, measurement, and treatment.' },
+  { name: 'Breast cancer', group: 'Cancer', summary: 'Learn about signs and symptoms, risk factors, screening, diagnosis, and treatment.' },
+  { name: 'Type 2 diabetes', group: 'Metabolic health', summary: 'Understand the condition, common factors, testing, and day-to-day care.' },
+  { name: 'Asthma', group: 'Breathing', summary: 'Explore common symptoms, triggers, and ways asthma is managed.' },
+  { name: 'High blood pressure', group: 'Heart health', summary: 'Understand blood pressure, possible health effects, and care.' },
 ]
 
 type SearchTopic = { title: string; group: string; points: string[]; url: string }
@@ -20,13 +20,13 @@ export default function HealthLibraryPage() {
   const [loading, setLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
 
-  async function search(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const term = query.trim()
+  async function searchTopic(value: string) {
+    const term = value.trim()
     if (term.length < 2) {
       setError('Type at least two letters to search health topics.')
       return
     }
+    setQuery(term)
     setError('')
     setLoading(true)
     setResults([])
@@ -43,11 +43,16 @@ export default function HealthLibraryPage() {
     }
   }
 
+  function search(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    void searchTopic(query)
+  }
+
   return <main className="library-page"><div className="shell"><SiteHeader />
     <section className="library-hero">
       <p className="eyebrow">MedVault health library</p>
       <h1>Clear information to help you prepare.</h1>
-      <p>Search health topics through MedlinePlus, a service of the US National Library of Medicine, or start with these common topics. Information is educational and cannot tell you what condition you have.</p>
+      <p>Find short, source-based health summaries here in MedVault. Search a topic or start with a common condition; links to original sources are optional if you want more detail.</p>
       <form className="library-search" onSubmit={search}>
         <label htmlFor="health-topic-search">Search a disease or health topic</label>
         <div><input id="health-topic-search" value={query} onChange={(event) => { setQuery(event.target.value); setError(''); setResults([]); setHasSearched(false) }} placeholder="For example, diabetes" maxLength={120} /><button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search topics'}</button></div>
@@ -64,7 +69,7 @@ export default function HealthLibraryPage() {
 
     <section className="library-section" aria-labelledby="starter-topics">
       <div className="library-section-heading"><div><p className="eyebrow">Browse</p><h2 id="starter-topics">Common starting points</h2></div><p>For more conditions, use the MedlinePlus search above. Its health topics are maintained by the National Library of Medicine.</p></div>
-      <div className="library-grid">{topics.map((topic) => <article className="library-card" key={topic.name}><p className="eyebrow">{topic.group}</p><h3>{topic.name}</h3><p>{topic.summary}</p><a className="text-action" href={topic.href} target="_blank" rel="noreferrer">Read the source</a></article>)}</div>
+      <div className="library-grid">{topics.map((topic) => <article className="library-card" key={topic.name}><p className="eyebrow">{topic.group}</p><h3>{topic.name}</h3><p>{topic.summary}</p><button className="text-action" type="button" onClick={() => void searchTopic(topic.name)}>See short summary</button></article>)}</div>
     </section>
 
     <section className="library-feature" aria-labelledby="breast-cancer-basics">
