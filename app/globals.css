@@ -236,6 +236,98 @@ input, select { border-radius: 3px; }
 .emergency-note p { margin: 0; color: #694b3d; font-size: 12px; line-height: 1.55; }
 .emergency-note a { color: #793820; font-weight: 800; text-decoration: underline; }
 .guide-disclosure { margin-top: 13px; }
+
+/* MedVault homepage */
+.home-page .hero-actions { margin-top: 29px; }
+.vault-hero { min-height: 630px; display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr); gap: clamp(42px, 6vw, 82px); align-items: center; padding: 72px 0 78px; }
+.vault-hero-copy { max-width: 630px; }
+.vault-hero-copy h1 { max-width: 620px; margin-bottom: 24px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(55px, 6.4vw, 80px); font-weight: 500; letter-spacing: -.06em; line-height: .98; }
+.vault-hero-description { max-width: 570px; margin-bottom: 0; color: #505d58; font-size: 17px; line-height: 1.75; }
+.vault-overview { position: relative; min-width: 0; padding: 28px 30px 0; overflow: hidden; background: #fffefa; border: 1px solid #d6ddd6; box-shadow: var(--shadow); }
+.vault-overview::before { position: absolute; inset: 0 0 auto; height: 5px; background: var(--forest); content: ''; }
+.vault-overview-top { display: flex; align-items: center; gap: 15px; padding: 5px 0 24px; }
+.vault-overview-mark { display: grid; width: 44px; height: 44px; flex: none; place-items: center; background: var(--forest); }
+.vault-overview-mark span { position: relative; width: 22px; height: 22px; border: 1px solid #d7e1db; }
+.vault-overview-mark span::before, .vault-overview-mark span::after { position: absolute; background: #fffefa; content: ''; }
+.vault-overview-mark span::before { top: 9px; left: 4px; width: 12px; height: 2px; }
+.vault-overview-mark span::after { top: 4px; left: 9px; width: 2px; height: 12px; }
+.vault-overview-top .eyebrow { margin-bottom: 4px; font-size: 10px; }
+.vault-overview-top h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-weight: 500; letter-spacing: -.035em; }
+.vault-overview-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 20px 0; border-top: 1px solid #e0e5df; }
+.vault-row-number { padding-top: 2px; color: var(--clay); font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.vault-overview-row h3 { margin: 0 0 4px; font-size: 15px; font-weight: 750; }
+.vault-overview-row p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.vault-row-label { padding: 4px 7px; border: 1px solid #d6e0d9; color: #31594c; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.vault-overview-foot { padding: 13px 0 15px; color: #6f7a75; border-top: 1px solid #e0e5df; font-size: 10px; }
+.home-capabilities { padding: 72px 0 84px; border-top: 1px solid #d5dbd5; }
+.home-section-intro { display: flex; justify-content: space-between; align-items: end; gap: 34px; }
+.home-section-intro h2, .guidance-copy h2, .clinic-support h2, .home-privacy h2 { max-width: 590px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(34px, 4vw, 46px); font-weight: 500; letter-spacing: -.045em; line-height: 1.08; }
+.home-section-intro > p { max-width: 360px; margin: 0 0 2px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.capability-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 35px; background: #fffefa; border: 1px solid var(--line); }
+.capability-card { display: flex; min-height: 280px; align-items: flex-start; flex-direction: column; padding: 24px 26px; }
+.capability-card + .capability-card { border-left: 1px solid var(--line); }
+.capability-number { color: var(--clay); font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.capability-card h3 { margin: 35px 0 9px; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.025em; }
+.capability-card p { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.capability-card a { margin-top: auto; color: var(--forest); font-size: 12px; font-weight: 750; text-decoration: underline; text-decoration-color: #b6c7bd; text-underline-offset: 4px; }
+.capability-card a:hover, .guidance-link:hover { color: var(--clay); }
+.home-guidance { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 7vw, 90px); padding: 72px 0; border-top: 1px solid #d5dbd5; }
+.guidance-copy h2 { margin-bottom: 17px; }
+.guidance-copy > p:not(.eyebrow) { max-width: 500px; color: #505d58; font-size: 14px; line-height: 1.75; }
+.guidance-copy .guidance-boundary { padding-left: 13px; color: var(--muted); border-left: 2px solid #c4d2c9; font-size: 12px; }
+.guidance-links { border-top: 1px solid var(--line); }
+.guidance-link { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 17px 0; border-bottom: 1px solid var(--line); transition: color .15s ease; }
+.guidance-link span { display: grid; gap: 3px; }
+.guidance-link small { color: var(--clay); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.guidance-link strong { font-size: 14px; }
+.guidance-link em { color: var(--muted); font-size: 12px; font-style: normal; }
+.guidance-link b { color: var(--forest); font-size: 17px; font-weight: 500; }
+.clinic-support { display: grid; grid-template-columns: 1fr .85fr; gap: 60px; padding: 48px; margin: 0 0 72px; background: #e8eee8; border: 1px solid #d7dfd8; }
+.clinic-support h2 { margin-bottom: 14px; }
+.clinic-support > div:first-child > p:last-child { max-width: 530px; margin: 0; color: #505d58; font-size: 14px; line-height: 1.7; }
+.clinic-steps { display: grid; align-content: center; gap: 0; }
+.clinic-steps > div { display: flex; gap: 13px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid #cdd8d0; font-size: 13px; }
+.clinic-steps > div span { color: var(--clay); font-size: 10px; font-weight: 800; }
+.clinic-steps .button { justify-self: start; margin-top: 17px; }
+.home-privacy { display: grid; grid-template-columns: .85fr 1.15fr; gap: 60px; padding: 4px 0 78px; }
+.home-privacy h2 { font-size: clamp(33px, 4vw, 42px); }
+.home-privacy ul { margin: 0; padding: 0; list-style: none; }
+.home-privacy li { position: relative; padding: 16px 0 16px 24px; color: #44524c; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.65; }
+.home-privacy li::before { position: absolute; top: 22px; left: 2px; width: 7px; height: 7px; background: var(--clay); content: ''; }
+.home-page .site-header nav { gap: clamp(15px, 2.6vw, 30px); }
+.home-page .site-header nav a { white-space: nowrap; }
+@media (max-width: 900px) {
+  .vault-hero { grid-template-columns: 1fr; gap: 38px; padding: 62px 0 68px; }
+  .vault-hero-copy { max-width: 720px; }
+  .vault-overview { max-width: 680px; }
+  .home-section-intro { align-items: start; flex-direction: column; gap: 14px; }
+  .home-section-intro > p { max-width: 540px; }
+  .capability-grid { grid-template-columns: 1fr; }
+  .capability-card { min-height: auto; padding: 23px; }
+  .capability-card h3 { margin: 21px 0 8px; }
+  .capability-card + .capability-card { border-top: 1px solid var(--line); border-left: 0; }
+  .home-guidance, .clinic-support, .home-privacy { grid-template-columns: 1fr; gap: 30px; }
+  .clinic-support { padding: 30px; }
+  .home-privacy { padding-bottom: 56px; }
+}
+@media (max-width: 560px) {
+  .home-page .shell { width: calc(100% - 32px); }
+  .home-page .site-header { min-height: 72px; gap: 14px; }
+  .home-page .site-header nav { gap: 11px; font-size: 11px; }
+  .home-page .site-header nav a:not(.nav-action) { display: none; }
+  .home-page .nav-action { padding: 8px 11px; }
+  .vault-hero { padding: 50px 0 56px; }
+  .vault-hero-copy h1 { font-size: clamp(48px, 13.5vw, 64px); }
+  .vault-hero-description { font-size: 15px; }
+  .home-page .hero-actions { align-items: stretch; flex-direction: column; }
+  .home-page .hero-actions .button { width: 100%; }
+  .vault-overview { padding: 25px 18px 0; }
+  .vault-overview-top h2 { font-size: 23px; }
+  .vault-overview-row { grid-template-columns: 28px minmax(0, 1fr); gap: 9px; }
+  .vault-row-label { grid-column: 2; width: fit-content; margin-top: -3px; }
+  .home-capabilities, .home-guidance { padding: 54px 0; }
+  .clinic-support { gap: 23px; padding: 23px 19px; margin-bottom: 54px; }
+}
 .library-page { min-height: 100vh; }
 .library-hero { max-width: 810px; padding: 76px 0 64px; }
 .library-hero h1 { max-width: 760px; margin-bottom: 18px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(44px, 6vw, 68px); font-weight: 500; letter-spacing: -.055em; line-height: 1; }

@@ -8,11 +8,9 @@ export function SiteHeader() {
         MedVault
       </Link>
       <nav aria-label="Primary navigation">
-        <Link href="/doctors">Find doctors</Link>
-        <Link href="/library">Health library</Link>
-        <Link href="/care-guide">Care guide</Link>
         <Link href="/health">My health</Link>
-        <Link href="/staff">Clinic staff</Link>
+        <Link href="/library">Health library</Link>
+        <Link href="/doctors">Find doctors</Link>
         <Link className="nav-action" href="/login">Sign in</Link>
       </nav>
     </header>
