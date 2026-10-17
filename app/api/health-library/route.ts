@@ -41,8 +41,17 @@ function parseTopics(xml: string): Topic[] {
     const title = fields.get('title')?.[0]
     if (!title) continue
     const sourceText = fields.get('FullSummary')?.[0] || fields.get('snippet')?.[0] || ''
-    const sentences = sourceText.match(/[^.!?]+(?:[.!?]+|$)/g) || []
-    const points = sentences.map((sentence) => sentence.trim()).filter((sentence) => sentence && !sentence.endsWith('?')).slice(0, 4)
+    const sentences = (sourceText.match(/[^.!?]+(?:[.!?]+|$)/g) || [])
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 24 && !sentence.endsWith('?'))
+    const points: string[] = []
+    const addPoint = (sentence?: string) => {
+      if (sentence && !points.includes(sentence) && points.length < 4) points.push(sentence)
+    }
+    addPoint(sentences[0])
+    addPoint(sentences.find((sentence) => /\b(cause|caused|because|risk factor|develop|due to|happens?)\b/i.test(sentence)))
+    addPoint(sentences.find((sentence) => /\b(prevent|avoid|reduce|lower|manage|treatment|screen|care|protect)\b/i.test(sentence)))
+    for (const sentence of sentences) addPoint(sentence)
     topics.push({ title, group: fields.get('groupName')?.[0] || 'Health topic', points, url: url.toString() })
     if (topics.length === 5) break
   }
