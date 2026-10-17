@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Queuewise | Clinic queues, made visible',
-  description: 'A live queue and scheduling tool for small clinics.',
+  title: 'MedVault | Personal health and clinic services',
+  description: 'Keep personal health records organized, track medication reminders, and find participating clinic services.',
   icons: { icon: '/favicon.svg' },
 }
 

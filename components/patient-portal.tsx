@@ -20,6 +20,7 @@ export function PatientPortal() {
   const [queueStatuses, setQueueStatuses] = useState<Record<string, QueueStatus>>({})
   const [clinicId, setClinicId] = useState('')
   const [scheduleId, setScheduleId] = useState('')
+  const [preferredDoctor, setPreferredDoctor] = useState('')
   const [loading, setLoading] = useState(true)
   const [booking, setBooking] = useState(false)
   const [error, setError] = useState('')
@@ -53,10 +54,17 @@ export function PatientPortal() {
       try {
         const supabase = createClient()
         const { data: userData } = await supabase.auth.getUser()
-        if (!userData.user) { router.push('/login'); return }
+        if (!userData.user) { router.push(`/login?next=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`); return }
         const { data, error: clinicsError } = await supabase.from('clinics').select('*').order('name')
         if (clinicsError) throw clinicsError
-        setClinics((data || []) as Clinic[])
+        const nextClinics = (data || []) as Clinic[]
+        setClinics(nextClinics)
+        const requested = new URLSearchParams(window.location.search)
+        const requestedClinic = requested.get('clinic')
+        if (requestedClinic && nextClinics.some((item) => item.id === requestedClinic)) {
+          setClinicId(requestedClinic)
+          setPreferredDoctor(requested.get('doctor') || '')
+        }
         await refreshAppointments()
         channel = supabase.channel(`patient-queue-${userData.user.id}`).on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
           refreshAppointments().catch(() => undefined)
@@ -79,14 +87,21 @@ export function PatientPortal() {
         const { data, error: fetchError } = await createClient().from('clinic_schedules')
           .select('*').eq('clinic_id', clinicId).eq('service_date', today()).order('opens_at')
         if (fetchError) throw fetchError
-        if (!cancelled) setSchedules((data || []) as Schedule[])
+        if (!cancelled) {
+          const nextSchedules = (data || []) as Schedule[]
+          setSchedules(nextSchedules)
+          if (preferredDoctor) {
+            const match = nextSchedules.find((item) => item.doctor_name.toLocaleLowerCase() === preferredDoctor.toLocaleLowerCase())
+            if (match) setScheduleId(match.id)
+          }
+        }
       } catch (caught) {
         if (!cancelled) setError(caught instanceof Error ? caught.message : 'Unable to load schedules.')
       }
     }
     load()
     return () => { cancelled = true }
-  }, [clinicId])
+  }, [clinicId, preferredDoctor])
 
   const selectedSchedule = useMemo(() => schedules.find((schedule) => schedule.id === scheduleId), [schedules, scheduleId])
 
@@ -122,7 +137,7 @@ export function PatientPortal() {
   if (loading) return <p className="page-state">Loading your queue…</p>
   return (
     <div className="portal-layout">
-      <aside className="portal-side"><Link className="wordmark" href="/"><span className="wordmark-mark" />Queuewise</Link><p>Patient portal</p><button className="link-button" onClick={signOut}>Sign out</button></aside>
+      <aside className="portal-side"><Link className="wordmark" href="/"><span className="wordmark-mark" />MedVault</Link><p>Patient portal</p><button className="link-button" onClick={signOut}>Sign out</button></aside>
       <main className="portal-main">
         <header className="portal-title"><div><p className="eyebrow">Patient portal</p><h1>Your clinic queue</h1></div><Link className="button button-secondary" href="/staff">Clinic staff</Link></header>
         {error && <p className="form-message error" role="alert">{error}</p>}
@@ -130,7 +145,7 @@ export function PatientPortal() {
         <section className="portal-grid">
           <div className="surface booking-surface"><h2>Book today&apos;s token</h2><p>One active token is allowed for each clinic session.</p>
             <form onSubmit={book} className="stack-form">
-              <label>Clinic<select value={clinicId} onChange={(event) => { setClinicId(event.target.value); setScheduleId('') }} required><option value="">Choose a clinic</option>{clinics.map((clinic) => <option value={clinic.id} key={clinic.id}>{clinic.name}</option>)}</select></label>
+              <label>Clinic<select value={clinicId} onChange={(event) => { setClinicId(event.target.value); setScheduleId(''); setPreferredDoctor('') }} required><option value="">Choose a clinic</option>{clinics.map((clinic) => <option value={clinic.id} key={clinic.id}>{clinic.name}</option>)}</select></label>
               <label>Doctor and time<select value={scheduleId} onChange={(event) => setScheduleId(event.target.value)} required disabled={!clinicId}><option value="">Choose today&apos;s session</option>{schedules.map((schedule) => <option key={schedule.id} value={schedule.id} disabled={!schedule.accepting_tokens}>{schedule.doctor_name} · {schedule.opens_at.slice(0, 5)} to {schedule.closes_at.slice(0, 5)} {!schedule.accepting_tokens ? '(closed)' : ''}</option>)}</select></label>
               {selectedSchedule && <p className="helper-text">Average consultation: {selectedSchedule.average_minutes} minutes. {selectedSchedule.capacity - selectedSchedule.last_token} tokens remain.</p>}
               <label>Your name<input name="name" required minLength={2} maxLength={80} /></label>

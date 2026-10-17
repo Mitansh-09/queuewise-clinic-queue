@@ -21,13 +21,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const form = new FormData(event.currentTarget)
     const email = String(form.get('email') || '').trim()
     const password = String(form.get('password') || '')
+    const requestedTarget = new URLSearchParams(window.location.search).get('next')
+    const destination = requestedTarget?.startsWith('/') && !requestedTarget.startsWith('//') ? requestedTarget : '/health'
 
     try {
       const supabase = createClient()
       if (mode === 'login') {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
         if (signInError) throw signInError
-        router.push('/patient')
+        router.push(destination)
         return
       }
 
@@ -36,13 +38,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { display_name: displayName }, emailRedirectTo: `${window.location.origin}/patient` },
+        options: { data: { display_name: displayName }, emailRedirectTo: `${window.location.origin}${destination}` },
       })
       if (signUpError) throw signUpError
       if (!data.session) {
         setMessage('Check your email to confirm the account, then return here to sign in.')
       } else {
-        router.push('/patient')
+        router.push(destination)
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Something went wrong. Please try again.')
@@ -60,7 +62,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       {error && <p className="form-message error" role="alert">{error}</p>}
       {message && <p className="form-message" role="status">{message}</p>}
       <button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Please wait' : register ? 'Create account' : 'Sign in'}</button>
-      <p className="auth-switch">{register ? 'Already have an account?' : 'New to Queuewise?'} <Link href={register ? '/login' : '/register'}>{register ? 'Sign in' : 'Create one'}</Link></p>
+      <p className="auth-switch">{register ? 'Already have an account?' : 'New to MedVault?'} <Link href={register ? '/login' : '/register'}>{register ? 'Sign in' : 'Create one'}</Link></p>
     </form>
   )
 }

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Appointment, Clinic, Schedule } from '@/lib/types'
+import { ClinicDoctorManager } from '@/components/doctor-directory'
 
 const today = () => new Date().toLocaleDateString('en-CA')
 
@@ -41,7 +42,7 @@ export function StaffConsole() {
       try {
         const supabase = createClient()
         const { data: identity } = await supabase.auth.getUser()
-        if (!identity.user) { router.push('/login'); return }
+        if (!identity.user) { router.push('/login?next=/staff'); return }
         const { data: memberships, error: membershipError } = await supabase.from('staff_members').select('clinic_id')
         if (membershipError) throw membershipError
         const ids = (memberships || []).map((membership) => membership.clinic_id)
@@ -159,7 +160,7 @@ export function StaffConsole() {
   if (loading) return <p className="page-state">Loading the staff console…</p>
   return (
     <div className="portal-layout staff-layout">
-      <aside className="portal-side"><Link className="wordmark" href="/"><span className="wordmark-mark" />Queuewise</Link><p>Clinic staff</p><button className="link-button" onClick={signOut}>Sign out</button></aside>
+      <aside className="portal-side"><Link className="wordmark" href="/"><span className="wordmark-mark" />MedVault</Link><p>Clinic staff</p><button className="link-button" onClick={signOut}>Sign out</button></aside>
       <main className="portal-main">
         <header className="portal-title"><div><p className="eyebrow">Front desk and doctor view</p><h1>Run today&apos;s queue</h1></div><Link className="button button-secondary" href="/patient">Patient portal</Link></header>
         {error && <p className="form-message error" role="alert">{error}</p>}{message && <p className="form-message" role="status">{message}</p>}
@@ -168,6 +169,7 @@ export function StaffConsole() {
           {selectedSchedule && <section className="queue-board"><div className="queue-summary"><p>Today&apos;s session</p><h2>{selectedSchedule.doctor_name}</h2><span>{selectedSchedule.opens_at.slice(0, 5)} to {selectedSchedule.closes_at.slice(0, 5)} · {selectedSchedule.last_token}/{selectedSchedule.capacity} tokens issued</span><button className="button button-secondary" onClick={toggleTokens} disabled={working}>{selectedSchedule.accepting_tokens ? 'Close new tokens' : 'Open new tokens'}</button></div><div className="now-serving"><p>Now serving</p><strong>{serving ? serving.token_number : 'None'}</strong><span>{serving ? serving.patient_name : 'No patient in consultation'}</span><button className="button button-primary" onClick={nextPatient} disabled={working}>{serving ? 'Complete and call next' : 'Call next patient'}</button></div></section>}
           {selectedSchedule && <section className="surface queue-table"><div className="section-heading"><h2>Waiting tokens</h2><span>{waiting.length} waiting</span></div>{waiting.length === 0 ? <p className="empty-state">There are no waiting tokens for this session.</p> : <div>{waiting.map((appointment) => <article className="staff-token" key={appointment.id}><strong>{appointment.token_number}</strong><div><h3>{appointment.patient_name}</h3><p>{appointment.phone}</p></div><button className="text-action" disabled={working} onClick={() => markNoShow(appointment.id)}>Mark no-show</button></article>)}</div>}</section>}
           <section className="surface schedule-form"><div><p className="eyebrow">Schedule management</p><h2>Create or update a doctor session</h2><p>Saving the same doctor and date updates that session and reopens token booking.</p></div><form onSubmit={createSchedule} className="schedule-fields"><label>Doctor name<input name="doctorName" required minLength={2} /></label><label>Date<input name="serviceDate" type="date" required min={today()} defaultValue={today()} /></label><label>Opens<input name="opensAt" type="time" required defaultValue="09:00" /></label><label>Closes<input name="closesAt" type="time" required defaultValue="13:00" /></label><label>Average minutes<input name="averageMinutes" type="number" required min="2" max="90" defaultValue="10" /></label><label>Token capacity<input name="capacity" type="number" required min="1" max="200" defaultValue="30" /></label><button className="button button-primary" disabled={working}>Save session</button></form></section>
+          {clinicId && <ClinicDoctorManager clinicId={clinicId} />}
         </>}
       </main>
     </div>
