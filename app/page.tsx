@@ -38,7 +38,7 @@ export default function Home() {
             <p className="vault-hero-description">Bring your records, family health profiles, and medication reminders together. Find participating doctors and read clear, source-based health information when you need it.</p>
             <div className="hero-actions">
               <Link className="button button-primary" href="/register">Create a patient account</Link>
-              <Link className="button button-secondary" href="/health">Explore My Health</Link>
+              <Link className="button button-secondary" href="/library">Browse health topics</Link>
             </div>
             <p className="hero-caption">Your vault is private to your account. Records are not shared with clinics.</p>
           </div>

@@ -296,6 +296,24 @@ input, select { border-radius: 3px; }
 .home-privacy li::before { position: absolute; top: 22px; left: 2px; width: 7px; height: 7px; background: var(--clay); content: ''; }
 .home-page .site-header nav { gap: clamp(15px, 2.6vw, 30px); }
 .home-page .site-header nav a { white-space: nowrap; }
+.site-header { position: relative; }
+.site-menu { display: none; position: relative; }
+.site-menu summary { display: flex; min-height: 42px; align-items: center; gap: 12px; padding: 0 12px; color: var(--forest); border: 1px solid #8ba39a; cursor: pointer; font-size: 13px; font-weight: 700; list-style: none; }
+.site-menu summary::-webkit-details-marker { display: none; }
+.site-menu summary i, .site-menu summary i::before, .site-menu summary i::after { display: block; width: 15px; height: 1px; background: var(--forest); }
+.site-menu summary i { position: relative; }
+.site-menu summary i::before, .site-menu summary i::after { position: absolute; left: 0; content: ''; }
+.site-menu summary i::before { top: -5px; }
+.site-menu summary i::after { top: 5px; }
+.site-menu nav { position: absolute; z-index: 5; top: calc(100% + 8px); right: 0; display: grid; min-width: 220px; gap: 0; padding: 7px; background: #fffefa; border: 1px solid var(--line); box-shadow: 0 12px 28px rgba(24, 59, 51, .13); }
+.site-menu nav a { padding: 11px 10px; color: var(--ink); font-size: 13px; }
+.site-menu nav a + a { border-top: 1px solid #edf0eb; }
+.site-menu nav a:hover { color: var(--clay); background: #f5f5ef; }
+.site-menu summary:focus-visible { outline: 3px solid #bf7447; outline-offset: 3px; }
+@media (max-width: 760px) {
+  .site-header > nav { display: none; }
+  .site-menu { display: block; }
+}
 @media (max-width: 900px) {
   .vault-hero { grid-template-columns: 1fr; gap: 38px; padding: 62px 0 68px; }
   .vault-hero-copy { max-width: 720px; }
@@ -313,9 +331,8 @@ input, select { border-radius: 3px; }
 @media (max-width: 560px) {
   .home-page .shell { width: calc(100% - 32px); }
   .home-page .site-header { min-height: 72px; gap: 14px; }
-  .home-page .site-header nav { gap: 11px; font-size: 11px; }
-  .home-page .site-header nav a:not(.nav-action) { display: none; }
-  .home-page .nav-action { padding: 8px 11px; }
+  .home-page .site-header > nav { display: none; }
+  .home-page .site-menu { display: block; }
   .vault-hero { padding: 50px 0 56px; }
   .vault-hero-copy h1 { font-size: clamp(48px, 13.5vw, 64px); }
   .vault-hero-description { font-size: 15px; }
