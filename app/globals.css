@@ -122,6 +122,30 @@ input, select { border-radius: 3px; }
   .principles { padding: 54px 0; }
 }
 
+.status-arrived { color: #155d75; background: #e1f0f3; }
+.status-skipped { color: #6c4a2c; background: #f0e8dd; }
+.clinic-admin-panel, .walk-in-panel, .report-panel, .clinic-create { padding: 28px; margin-top: 20px; }
+.clinic-admin-panel h3 { margin: 28px 0 8px; font-size: 19px; }
+.clinic-admin-panel > p:not(.eyebrow), .walk-in-panel > p:not(.eyebrow) { color: var(--muted); font-size: 14px; }
+.check-label { display: flex !important; align-items: center; gap: 10px !important; }
+.check-label input { width: 18px; height: 18px; }
+.staff-list { display: grid; }
+.staff-row-actions { display: flex; flex-wrap: wrap; gap: 12px; grid-column: 2 / -1; }
+.staff-token > .status { justify-self: start; }
+.doctor-visit-note { padding: 10px 12px; margin-top: 8px !important; color: #344840 !important; background: #edf2ee; border-left: 2px solid var(--forest); }
+.patient-token-actions { display: grid; justify-items: start; gap: 9px; margin-top: 15px; }
+.patient-token-actions label { display: grid; gap: 5px; font-size: 12px; font-weight: 700; }
+.patient-token-actions select { min-width: 230px; }
+.travel-time-field { display: grid; max-width: 280px; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 700; }
+.leave-alert { padding: 12px 14px; color: #68421e !important; background: #fbefd9; border-left: 3px solid #bb7b29; }
+.report-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+.report-stat { display: grid; gap: 5px; padding: 17px; background: #f3f5f1; border: 1px solid var(--line); }
+.report-stat span { color: var(--muted); font-size: 12px; }
+.report-stat strong { color: var(--forest); font-size: 25px; }
+.walk-in-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 760px) { .walk-in-form { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .clinic-admin-panel, .walk-in-panel, .report-panel, .clinic-create { padding: 19px; }.report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* MedVault health workspace */
 .health-page, .directory-page, .care-guide-page { min-height: 100vh; background: #f4f5f0; }
 .health-topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 clamp(20px, 5vw, 76px); background: #fffefa; border-bottom: 1px solid var(--line); }

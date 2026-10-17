@@ -15,6 +15,7 @@ type Doctor = {
   languages: string[]
   search_terms: string[]
   listed?: boolean
+  user_id?: string | null
   clinics: { name: string; address: string }
 }
 
@@ -66,7 +67,7 @@ export function ClinicDoctorManager({ clinicId }: { clinicId: string }) {
     async function load() {
       try {
         const { data, error: fetchError } = await createClient().from('clinic_doctors')
-          .select('id,clinic_id,display_name,specialty,qualifications,experience_years,languages,search_terms,listed,clinics!inner(name,address)')
+          .select('id,clinic_id,display_name,specialty,qualifications,experience_years,languages,search_terms,listed,user_id,clinics!inner(name,address)')
           .eq('clinic_id', clinicId).order('display_name')
         if (fetchError) throw fetchError
         if (!cancelled) setDoctors((data || []) as unknown as Doctor[])
@@ -83,7 +84,7 @@ export function ClinicDoctorManager({ clinicId }: { clinicId: string }) {
     const form = event.currentTarget
     const values = new FormData(form)
     try {
-      const { data, error: insertError } = await createClient().from('clinic_doctors').insert({
+        const { data, error: insertError } = await createClient().from('clinic_doctors').insert({
         clinic_id: clinicId,
         display_name: String(values.get('name') || '').trim(),
         specialty: String(values.get('specialty') || '').trim(),
@@ -91,6 +92,7 @@ export function ClinicDoctorManager({ clinicId }: { clinicId: string }) {
         experience_years: String(values.get('experience') || '') ? Number(values.get('experience')) : null,
         languages: String(values.get('languages') || '').split(',').map((item) => item.trim()).filter(Boolean).slice(0, 10),
         search_terms: String(values.get('searchTerms') || '').split(',').map((item) => item.trim()).filter(Boolean).slice(0, 24),
+        user_id: String(values.get('accountId') || '').trim() || null,
       }).select('id,clinic_id,display_name,specialty,qualifications,experience_years,languages,search_terms,listed,clinics!inner(name,address)').single()
       if (insertError) throw insertError
       setDoctors((items) => [...items, data as unknown as Doctor]); setMessage('Doctor profile is now listed.'); form.reset()
@@ -105,5 +107,5 @@ export function ClinicDoctorManager({ clinicId }: { clinicId: string }) {
     setDoctors((items) => items.map((item) => item.id === doctor.id ? { ...item, listed } : item))
   }
 
-  return <section className="surface doctor-manager"><div className="health-panel-heading"><div><p className="eyebrow">Clinic directory</p><h2>Doctor listings</h2></div></div>{error && <p className="form-message error" role="alert">{error}</p>}{message && <p className="form-message" role="status">{message}</p>}<form className="doctor-manager-form" onSubmit={addDoctor}><label>Doctor name<input name="name" required minLength={2} maxLength={100} /></label><label>Specialty<input name="specialty" required minLength={2} maxLength={100} placeholder="For example, pediatrics" /></label><label>Qualifications<input name="qualifications" maxLength={200} /></label><label>Years of experience<input name="experience" type="number" min="0" max="70" /></label><label>Languages, separated by commas<input name="languages" placeholder="Hindi, English" /></label><label>Conditions or search terms<input name="searchTerms" placeholder="For example, asthma, allergies" /></label><button className="button button-primary" disabled={busy}>{busy ? 'Saving…' : 'Add doctor profile'}</button></form><div className="health-list">{loading ? <p className="page-state">Loading clinic listings…</p> : doctors.map((doctor) => <article className="health-list-item" key={doctor.id}><div><h3>{doctor.display_name}</h3><p>{doctor.specialty} · {doctor.listed === false ? 'Hidden from directory' : 'Listed'}</p></div><button className="text-action" onClick={() => toggleListing(doctor)}>{doctor.listed === false ? 'Publish' : 'Hide listing'}</button></article>)}{!loading && doctors.length === 0 && <p className="empty-state">No doctor profiles have been added for this clinic.</p>}</div></section>
+  return <section className="surface doctor-manager"><div className="health-panel-heading"><div><p className="eyebrow">Clinic directory</p><h2>Doctor listings</h2></div></div>{error && <p className="form-message error" role="alert">{error}</p>}{message && <p className="form-message" role="status">{message}</p>}<form className="doctor-manager-form" onSubmit={addDoctor}><label>Doctor name<input name="name" required minLength={2} maxLength={100} /></label><label>Specialty<input name="specialty" required minLength={2} maxLength={100} placeholder="For example, pediatrics" /></label><label>Doctor account ID, for doctor login<input name="accountId" placeholder="Optional account UUID" /></label><label>Qualifications<input name="qualifications" maxLength={200} /></label><label>Years of experience<input name="experience" type="number" min="0" max="70" /></label><label>Languages, separated by commas<input name="languages" placeholder="Hindi, English" /></label><label>Conditions or search terms<input name="searchTerms" placeholder="For example, asthma, allergies" /></label><button className="button button-primary" disabled={busy}>{busy ? 'Saving…' : 'Add doctor profile'}</button></form><div className="health-list">{loading ? <p className="page-state">Loading clinic listings…</p> : doctors.map((doctor) => <article className="health-list-item" key={doctor.id}><div><h3>{doctor.display_name}</h3><p>{doctor.specialty} · {doctor.listed === false ? 'Hidden from directory' : 'Listed'}{doctor.user_id ? ' · Account linked' : ''}</p></div><button className="text-action" onClick={() => toggleListing(doctor)}>{doctor.listed === false ? 'Publish' : 'Hide listing'}</button></article>)}{!loading && doctors.length === 0 && <p className="empty-state">No doctor profiles have been added for this clinic.</p>}</div></section>
 }

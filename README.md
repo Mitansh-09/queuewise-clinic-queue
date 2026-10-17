@@ -21,7 +21,7 @@ People often manage health records across paper files, clinic portals, and famil
 3. The patient records medication reminder times and logs doses.
 4. Patients search clinician listings by name, specialty, clinic, and clinic-entered search terms.
 5. The browser-only care guide matches keywords to a specialty and shows corresponding clinic listings. It does not diagnose or send symptom text to an AI service.
-6. Patients can also book a same-day clinic token. Staff operate an ordered queue with live updates.
+6. Patients book a same-day token and can check in with staff. Clinic teams operate a shared online and walk-in queue with live updates and timestamped transitions.
 
 ## Key features
 
@@ -32,6 +32,14 @@ People often manage health records across paper files, clinic portals, and famil
 - Live queue updates via Supabase Realtime
 - Doctor sessions with date, hours, average consultation time, and capacity
 - Reception controls for next patient, completion, no-show, and token availability
+- Separate patient, receptionist, doctor, and clinic-admin access
+- One-tap arrival, skip, no-show, restore-to-queue, and call-next workflow
+- Walk-in registration in the same token sequence as online bookings
+- Patient cancellation and rescheduling before the clinic cutoff
+- Doctor view limited to assigned doctor sessions, including a separately protected patient-shared visit reason
+- Clinic settings for booking, cancellation cutoff, session fees, and closure days
+- Daily booked, arrival, completion, no-show, wait, and consultation figures from recorded timestamps
+- Live in-page “consider leaving” nudge based on the patient-entered travel time and current queue estimate
 - Privacy Policy, Terms of Use, and a custom favicon
 - Private family health profiles and document vault
 - PDF, JPG, and PNG uploads, limited to 10 MB per file
@@ -68,10 +76,11 @@ Patient and staff screens refresh their queue state
 | --- | --- |
 | `profiles` | Account name, phone, and default patient role |
 | `clinics` | Clinic name, address, and active state |
-| `staff_members` | Assigns a receptionist or doctor to one clinic |
+| `staff_members` | Assigns a receptionist, doctor, or clinic admin to one clinic |
 | `clinic_schedules` | Daily doctor sessions, capacity, and token availability |
-| `appointments` | Queue tokens and their lifecycle |
+| `appointments` | Queue tokens, optional patient-shared reason, source, and workflow timestamps |
 | `queue_events` | Audit trail for queue status changes |
+| `clinic_settings`, `clinic_closures` | Clinic booking preferences and doctor/clinic closure days |
 
 ## Local setup
 
@@ -87,13 +96,23 @@ Create a new Supabase project, or use an existing project. In Authentication set
 
 ### 3. Apply the database migrations
 
-Apply the migrations in order. The first three create and secure the queue schema. The fourth adds MedVault tables, ownership policies, and the private `health-records` bucket. The fifth tightens doctor-directory policies. Do not omit the RLS policies.
+Apply the migrations in order. The first five create and secure the original queue and MedVault schema. Migrations six through fifteen add pilot roles, timestamps, clinic operations, stricter doctor access, reschedule history, and private visit notes. Do not omit the RLS policies.
 
 - [`202610170001_create_queuewise.sql`](supabase/migrations/202610170001_create_queuewise.sql)
 - [`202610170002_harden_queue_access.sql`](supabase/migrations/202610170002_harden_queue_access.sql)
 - [`202610170003_revoke_anon_rpc.sql`](supabase/migrations/202610170003_revoke_anon_rpc.sql)
 - [`202610170004_add_medvault.sql`](supabase/migrations/202610170004_add_medvault.sql)
 - [`202610170005_harden_doctor_directory_policies.sql`](supabase/migrations/202610170005_harden_doctor_directory_policies.sql)
+- [`202610170006_pilot_roles_and_statuses.sql`](supabase/migrations/202610170006_pilot_roles_and_statuses.sql)
+- [`202610170007_pilot_operations.sql`](supabase/migrations/202610170007_pilot_operations.sql)
+- [`202610170008_queue_order_and_checkin.sql`](supabase/migrations/202610170008_queue_order_and_checkin.sql)
+- [`202610170009_doctor_scoped_queue_access.sql`](supabase/migrations/202610170009_doctor_scoped_queue_access.sql)
+- [`202610170010_admin_only_configuration.sql`](supabase/migrations/202610170010_admin_only_configuration.sql)
+- [`202610170011_finalize_queue_policy_indexes.sql`](supabase/migrations/202610170011_finalize_queue_policy_indexes.sql)
+- [`202610170012_record_reschedules.sql`](supabase/migrations/202610170012_record_reschedules.sql)
+- [`202610170013_doctor_private_visit_notes.sql`](supabase/migrations/202610170013_doctor_private_visit_notes.sql)
+- [`202610170014_pilot_permission_edges.sql`](supabase/migrations/202610170014_pilot_permission_edges.sql)
+- [`202610170015_unique_closure_dates.sql`](supabase/migrations/202610170015_unique_closure_dates.sql)
 
 ### 4. Configure environment variables
 
@@ -116,8 +135,18 @@ Open `http://localhost:3000`.
 
 ## First clinic setup
 
-1. Register the clinic staff account in MedVault.
-2. In Supabase SQL Editor, add a clinic.
+1. Register a platform administrator account and set its `profiles.role` to `admin` from the Supabase SQL Editor. This is a one-time trusted bootstrap. Users cannot change their own role from the app.
+
+```sql
+update public.profiles set role = 'admin' where id = 'registered-account-uuid';
+```
+
+2. Sign in to Clinic staff and create a clinic. The creator becomes its clinic admin.
+3. Register receptionist and doctor accounts. Use the clinic admin screen to assign each account UUID a clinic role.
+4. Add each doctor profile and link the doctor account UUID. Doctor accounts only see sessions matching their linked doctor profile.
+5. Add session times, fees, average consult minutes, and capacity in clinic staff.
+
+For manual recovery, an administrator can add a clinic directly:
 
 ```sql
 insert into public.clinics (name, address)
@@ -125,15 +154,14 @@ values ('Your Clinic Name', 'Your clinic address')
 returning id;
 ```
 
-3. Find the staff account ID in `auth.users`, then link it to the clinic using the returned clinic ID.
+Find the staff account ID in `auth.users`, then link it to the clinic using the returned clinic ID.
 
 ```sql
 insert into public.staff_members (clinic_id, user_id, role)
 values ('clinic-id-here', 'staff-user-id-here', 'receptionist');
 ```
 
-4. Sign in as that staff member, open **Clinic staff**, select the clinic, and create a doctor session.
-5. In the same console, add each real doctor’s directory profile and search terms. The patient directory has no seeded sample doctors.
+The patient directory has no seeded sample doctors.
 
 The first signed-in account should retain its `patient` profile role. Clinic authorization is based on `staff_members`, which prevents a user from granting themselves staff access in the browser.
 
@@ -142,13 +170,14 @@ The first signed-in account should retain its `patient` profile role. Clinic aut
 - Row Level Security is enabled on every public table.
 - Patients can read only their own bookings and queue events.
 - Staff can read tokens only for clinics they are assigned to.
-- Booking, advancing, schedule creation, and no-show actions use authenticated database functions that verify clinic membership.
+- Booking, walk-ins, arrival, status changes, advancing, schedule management, clinic setup, staff roles, and closures use authenticated database functions or RLS policies that verify the patient or clinic role.
 - The profile update permission permits only display name and phone, so a user cannot change their own role.
 - The UI uses only the Supabase publishable key.
 - Health profiles, document metadata, medications, and dose logs are restricted to the account that owns the profile through RLS.
 - Uploaded files use a private bucket, account-prefixed object paths, PDF/JPG/PNG types, and a 10 MB limit.
 - Clinic staff do not have access to patient vault documents in this version. Patient record sharing is not implemented.
-- The care guide uses a small local keyword map in the browser. It does not store or send the user’s text, call a language model, diagnose, or triage.
+- The care guide uses a small local keyword map and a narrow red-flag phrase list. It is not an AI, diagnosis, or triage service, may miss urgent symptoms, and cannot determine whether it is safe to wait.
+- The leave-time nudge is visible only while the patient page is open. It uses the clinic estimate and user-entered travel time. No SMS or WhatsApp provider is connected, and no external alert delivery is promised.
 - The deployed Supabase project is in Australia (Sydney). This is a student demonstration and has not had a hospital privacy, clinical-safety, legal, or independent security review. Do not claim healthcare compliance or use it for hospital production without those reviews.
 
 ## Reliability and error handling
@@ -157,6 +186,7 @@ The first signed-in account should retain its `patient` profile role. Clinic aut
 - The database rejects token bookings for a closed, full, past, or already-booked session.
 - Queue status changes use an audit event.
 - The interface shows loading, empty, success, and error states for booking and staff actions.
+- Booking time, check-in, consultation start, consultation end, skip, and no-show events are timestamped. Reports calculate wait only where both check-in and consultation-start timestamps exist.
 - Wait time is clearly presented as an estimate, not a guarantee.
 
 ## Deployment
@@ -171,9 +201,9 @@ Before submission, test the deployed app in a private browser window with a pati
 2. Sign in as a staff member and create a doctor session.
 3. Sign in as a patient and book a token.
 4. Show the patient token and estimated wait.
-5. Return to the staff console and call the next patient.
+5. In the receptionist view, check in the patient and call the next patient.
 6. Show the patient portal updating live.
-7. Demonstrate closing tokens and marking a no-show.
+7. Demonstrate a walk-in, skip/no-show, and the daily timestamp report.
 
 ## Limits for this first release
 

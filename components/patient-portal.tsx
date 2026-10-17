@@ -21,6 +21,8 @@ export function PatientPortal() {
   const [clinicId, setClinicId] = useState('')
   const [scheduleId, setScheduleId] = useState('')
   const [preferredDoctor, setPreferredDoctor] = useState('')
+  const [rescheduleIds, setRescheduleIds] = useState<Record<string, string>>({})
+  const [travelMinutes, setTravelMinutes] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [booking, setBooking] = useState(false)
   const [error, setError] = useState('')
@@ -32,7 +34,7 @@ export function PatientPortal() {
     if (fetchError) throw fetchError
     const next = (data || []) as Appointment[]
     setAppointments(next)
-    const active = next.filter((item) => item.status === 'waiting' || item.status === 'serving')
+    const active = next.filter((item) => ['waiting', 'arrived', 'serving'].includes(item.status))
     const responses = await Promise.all(active.map(async (item) => {
       const { data: status } = await supabase.rpc('get_patient_queue_status', { p_appointment_id: item.id })
       return [item.id, (status as QueueStatus[] | null)?.[0]] as const
@@ -43,7 +45,7 @@ export function PatientPortal() {
   const loadSchedules = useCallback(async (id: string) => {
     if (!id) return setSchedules([])
     const { data, error: fetchError } = await createClient().from('clinic_schedules')
-      .select('*').eq('clinic_id', id).eq('service_date', today()).order('opens_at')
+      .select('*').eq('clinic_id', id).gte('service_date', today()).order('service_date').order('opens_at')
     if (fetchError) throw fetchError
     setSchedules((data || []) as Schedule[])
   }, [])
@@ -85,7 +87,7 @@ export function PatientPortal() {
     async function load() {
       try {
         const { data, error: fetchError } = await createClient().from('clinic_schedules')
-          .select('*').eq('clinic_id', clinicId).eq('service_date', today()).order('opens_at')
+          .select('*').eq('clinic_id', clinicId).gte('service_date', today()).order('service_date').order('opens_at')
         if (fetchError) throw fetchError
         if (!cancelled) {
           const nextSchedules = (data || []) as Schedule[]
@@ -116,6 +118,7 @@ export function PatientPortal() {
         p_schedule_id: scheduleId,
         p_patient_name: String(form.get('name') || '').trim(),
         p_phone: String(form.get('phone') || '').trim(),
+        p_visit_reason: String(form.get('visitReason') || '').trim() || null,
       })
       if (bookingError) throw bookingError
       event.currentTarget.reset()
@@ -127,6 +130,22 @@ export function PatientPortal() {
     } finally {
       setBooking(false)
     }
+  }
+
+  async function cancelToken(id: string) {
+    setError(''); setMessage('')
+    const { error: cancelError } = await createClient().rpc('cancel_queue_token', { p_appointment_id: id })
+    if (cancelError) return setError(cancelError.message)
+    setMessage('Your token was cancelled.'); await refreshAppointments()
+  }
+
+  async function rescheduleToken(id: string) {
+    const nextId = rescheduleIds[id]
+    if (!nextId) return setError('Choose another clinic session first.')
+    setError(''); setMessage('')
+    const { error: changeError } = await createClient().rpc('reschedule_queue_token', { p_appointment_id: id, p_new_schedule_id: nextId })
+    if (changeError) return setError(changeError.message)
+    setMessage('Your token was moved to the selected session.'); await refreshAppointments()
   }
 
   async function signOut() {
@@ -146,16 +165,21 @@ export function PatientPortal() {
           <div className="surface booking-surface"><h2>Book today&apos;s token</h2><p>One active token is allowed for each clinic session.</p>
             <form onSubmit={book} className="stack-form">
               <label>Clinic<select value={clinicId} onChange={(event) => { setClinicId(event.target.value); setScheduleId(''); setPreferredDoctor('') }} required><option value="">Choose a clinic</option>{clinics.map((clinic) => <option value={clinic.id} key={clinic.id}>{clinic.name}</option>)}</select></label>
-              <label>Doctor and time<select value={scheduleId} onChange={(event) => setScheduleId(event.target.value)} required disabled={!clinicId}><option value="">Choose today&apos;s session</option>{schedules.map((schedule) => <option key={schedule.id} value={schedule.id} disabled={!schedule.accepting_tokens}>{schedule.doctor_name} · {schedule.opens_at.slice(0, 5)} to {schedule.closes_at.slice(0, 5)} {!schedule.accepting_tokens ? '(closed)' : ''}</option>)}</select></label>
-              {selectedSchedule && <p className="helper-text">Average consultation: {selectedSchedule.average_minutes} minutes. {selectedSchedule.capacity - selectedSchedule.last_token} tokens remain.</p>}
+              <label>Doctor and time<select value={scheduleId} onChange={(event) => setScheduleId(event.target.value)} required disabled={!clinicId}><option value="">Choose today&apos;s session</option>{schedules.filter((schedule) => schedule.service_date === today()).map((schedule) => <option key={schedule.id} value={schedule.id} disabled={!schedule.accepting_tokens}>{schedule.doctor_name} · {schedule.opens_at.slice(0, 5)} to {schedule.closes_at.slice(0, 5)} {!schedule.accepting_tokens ? '(closed)' : ''}</option>)}</select></label>
+              {selectedSchedule && <p className="helper-text">Starting estimate: {selectedSchedule.average_minutes} minutes per visit. Fee: ₹{Number(selectedSchedule.fee || 0).toFixed(0)}. {selectedSchedule.capacity - selectedSchedule.last_token} tokens remain.</p>}
               <label>Your name<input name="name" required minLength={2} maxLength={80} /></label>
               <label>Mobile number<input name="phone" required inputMode="tel" minLength={7} maxLength={20} /></label>
+              <label>What would you like the doctor to know? (optional)<textarea name="visitReason" maxLength={500} rows={3} placeholder="Share only what you want the clinic team to see" /></label>
               <button className="button button-primary" disabled={booking}>{booking ? 'Booking token' : 'Book token'}</button>
             </form>
           </div>
           <div className="surface"><h2>My tokens</h2>{appointments.length === 0 ? <p className="empty-state">You do not have a token yet. Book one for an available clinic session.</p> : <div className="appointment-list">{appointments.map((appointment) => {
             const status = queueStatuses[appointment.id]
-            return <article key={appointment.id} className="appointment-card"><div><p className="token-label">Token</p><strong className="token-number">{appointment.token_number}</strong></div><div><span className={`status status-${appointment.status}`}>{labelFor(appointment.status)}</span><h3>{status?.clinic_name || 'Clinic visit'}</h3>{status ? <><p>{status.doctor_name} · {status.people_ahead} {status.people_ahead === 1 ? 'person' : 'people'} ahead</p><p className="wait">Estimated wait: {status.estimated_wait_minutes} minutes</p></> : <p>This token is closed.</p>}</div></article>
+            const canChange = appointment.status === 'waiting' || appointment.status === 'arrived'
+            const otherSessions = schedules.filter((item) => item.id !== appointment.schedule_id && item.accepting_tokens && item.last_token < item.capacity)
+            const travel = travelMinutes[appointment.id] || 0
+            const leaveNow = status && appointment.status === 'waiting' && travel > 0 && status.estimated_wait_minutes <= travel
+            return <article key={appointment.id} className="appointment-card"><div><p className="token-label">Token</p><strong className="token-number">{appointment.token_number}</strong></div><div><span className={`status status-${appointment.status}`}>{labelFor(appointment.status)}</span><h3>{status?.clinic_name || 'Clinic visit'}</h3>{status ? <><p>{status.doctor_name} · {status.people_ahead} {status.people_ahead === 1 ? 'person' : 'people'} ahead</p><p className="wait">Estimated wait: {status.estimated_wait_minutes} minutes</p><p className="helper-text">Estimate uses {status.average_consult_minutes} minute consultations and may change as visits finish.</p></> : <p>This token is closed.</p>}{appointment.status === 'waiting' && status && <label className="travel-time-field">Minutes needed to reach the clinic<input type="number" min="0" max="240" value={travel} onChange={(event) => setTravelMinutes((items) => ({ ...items, [appointment.id]: Number(event.target.value) }))} /></label>}{leaveNow && <p className="leave-alert" role="status"><strong>Consider leaving now.</strong> The queue estimate is within your travel time. Keep checking for updates and contact the clinic if needed. This alert appears only while this page is open.</p>}{canChange && <div className="patient-token-actions"><button type="button" className="text-action" onClick={() => cancelToken(appointment.id)}>Cancel token</button><label>Move to<select value={rescheduleIds[appointment.id] || ''} onChange={(event) => setRescheduleIds((items) => ({ ...items, [appointment.id]: event.target.value }))}><option value="">Choose another session</option>{otherSessions.map((item) => <option key={item.id} value={item.id}>{item.service_date} · {item.doctor_name} · {item.opens_at.slice(0, 5)}</option>)}</select></label><button type="button" className="text-action" onClick={() => rescheduleToken(appointment.id)}>Reschedule</button></div>}</div></article>
           })}</div>}</div>
         </section>
       </main>

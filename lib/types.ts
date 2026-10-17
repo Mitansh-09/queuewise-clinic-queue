@@ -11,20 +11,26 @@ export type Schedule = {
   capacity: number
   accepting_tokens: boolean
   last_token: number
+  fee: number
+  cancellation_cutoff_minutes: number
 }
 
-export type AppointmentStatus = 'waiting' | 'serving' | 'completed' | 'no_show' | 'cancelled'
+export type AppointmentStatus = 'waiting' | 'arrived' | 'serving' | 'completed' | 'no_show' | 'skipped' | 'cancelled'
 
 export type Appointment = {
   id: string
   clinic_id: string
   schedule_id: string
-  patient_id: string
+  patient_id: string | null
   patient_name: string
   phone: string
   token_number: number
   status: AppointmentStatus
   created_at: string
+  source: 'online' | 'walk_in'
+  checked_in_at: string | null
+  consultation_started_at: string | null
+  consultation_ended_at: string | null
 }
 
 export type QueueStatus = {
@@ -35,4 +41,5 @@ export type QueueStatus = {
   clinic_name: string
   doctor_name: string
   service_date: string
+  average_consult_minutes: number
 }

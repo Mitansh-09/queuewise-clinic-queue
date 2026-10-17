@@ -9,20 +9,20 @@ export default function Home() {
         <SiteHeader />
         <section className="hero">
           <div>
-            <p className="eyebrow">A personal health organizer</p>
-            <h1>Your health information, in one place.</h1>
-            <p className="hero-copy">Keep medical documents organized, track medication reminders for your family, and find clinicians at participating clinics. Your private vault stays under your account.</p>
+            <p className="eyebrow">Clinic queues and personal health records</p>
+            <h1>Know your place in the clinic queue.</h1>
+            <p className="hero-copy">Book a clinic token, follow an estimated wait, and keep your family’s health documents organized in a private account.</p>
             <div className="hero-actions">
               <Link className="button button-primary" href="/register">Create a patient account</Link>
               <Link className="button button-secondary" href="/doctors">Find a doctor</Link>
             </div>
             <p className="hero-caption">Health organizer and clinic directory. Not an emergency service or medical advice.</p>
           </div>
-          <div className="flow-panel" aria-label="MedVault health tools">
-            <div className="flow-panel-head"><span className="flow-mark" aria-hidden="true" /><div><p className="eyebrow">Your health toolkit</p><h2>Care, organized around you</h2></div></div>
-            <div className="flow-step"><span className="flow-index">01</span><div><h3>Personal records</h3><p>Store reports and visit documents in your private account.</p></div><span className="flow-state">Private vault</span></div>
-            <div className="flow-step"><span className="flow-index">02</span><div><h3>Family profiles</h3><p>Keep care notes and records organized by family member.</p></div><span className="flow-state">Your account</span></div>
-            <div className="flow-step"><span className="flow-index">03</span><div><h3>Find clinic care</h3><p>Browse real clinician listings and view available queue sessions.</p></div><span className="flow-state">Clinic listed</span></div>
+          <div className="flow-panel" aria-label="Clinic queue workflow">
+            <div className="flow-panel-head"><span className="flow-mark" aria-hidden="true" /><div><p className="eyebrow">A clinic visit</p><h2>From booking to done</h2></div></div>
+            <div className="flow-step"><span className="flow-index">01</span><div><h3>Patient books</h3><p>Choose a participating clinic and today’s doctor session.</p></div><span className="flow-state">Token issued</span></div>
+            <div className="flow-step"><span className="flow-index">02</span><div><h3>Clinic checks in</h3><p>Reception manages the shared online and walk-in queue.</p></div><span className="flow-state">Staff controlled</span></div>
+            <div className="flow-step"><span className="flow-index">03</span><div><h3>Patient follows</h3><p>See queue position and an estimate that updates as visits finish.</p></div><span className="flow-state">Live updates</span></div>
             <div className="flow-panel-foot"><span>Health data is not shared with clinics</span></div>
           </div>
         </section>
@@ -41,7 +41,7 @@ export default function Home() {
           <div><p className="eyebrow">Privacy and care boundaries</p><h2>Organized, with clear limits.</h2></div>
           <ul>
             <li>Health files are stored in a private bucket and are accessible only to the signed-in account that uploaded them.</li>
-            <li>The care guide uses simple keyword matching. It does not diagnose, assess urgency, or send the text to a model.</li>
+            <li>The care guide uses simple keyword matching. Its urgency labels are not clinical triage and may miss urgent symptoms.</li>
             <li>Records are not shared with doctors. You can still book a clinic queue token separately through a participating clinic.</li>
           </ul>
         </section>
