@@ -291,12 +291,12 @@ begin
 end;
 $$;
 
-revoke all on function public.book_queue_token(uuid, uuid, text, text) from public;
-revoke all on function public.advance_queue(uuid, uuid) from public;
-revoke all on function public.set_queue_status(uuid, public.appointment_status) from public;
-revoke all on function public.get_patient_queue_status(uuid) from public;
-revoke all on function public.create_clinic_schedule(uuid, text, date, time, time, integer, integer) from public;
-revoke all on function public.set_token_acceptance(uuid, boolean) from public;
+revoke all on function public.book_queue_token(uuid, uuid, text, text) from public, anon;
+revoke all on function public.advance_queue(uuid, uuid) from public, anon;
+revoke all on function public.set_queue_status(uuid, public.appointment_status) from public, anon;
+revoke all on function public.get_patient_queue_status(uuid) from public, anon;
+revoke all on function public.create_clinic_schedule(uuid, text, date, time, time, integer, integer) from public, anon;
+revoke all on function public.set_token_acceptance(uuid, boolean) from public, anon;
 grant execute on function public.book_queue_token(uuid, uuid, text, text) to authenticated;
 grant execute on function public.advance_queue(uuid, uuid) to authenticated;
 grant execute on function public.set_queue_status(uuid, public.appointment_status) to authenticated;

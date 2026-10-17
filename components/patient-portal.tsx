@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Appointment, Clinic, QueueStatus, Schedule } from '@/lib/types'
 
@@ -12,6 +13,7 @@ function labelFor(status: Appointment['status']) {
 }
 
 export function PatientPortal() {
+  const router = useRouter()
   const [clinics, setClinics] = useState<Clinic[]>([])
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -51,7 +53,7 @@ export function PatientPortal() {
       try {
         const supabase = createClient()
         const { data: userData } = await supabase.auth.getUser()
-        if (!userData.user) { window.location.assign('/login'); return }
+        if (!userData.user) { router.push('/login'); return }
         const { data, error: clinicsError } = await supabase.from('clinics').select('*').order('name')
         if (clinicsError) throw clinicsError
         setClinics((data || []) as Clinic[])
@@ -67,9 +69,24 @@ export function PatientPortal() {
     }
     load()
     return () => { if (channel) createClient().removeChannel(channel) }
-  }, [refreshAppointments])
+  }, [refreshAppointments, router])
 
-  useEffect(() => { loadSchedules(clinicId).catch((caught) => setError(caught.message)) }, [clinicId, loadSchedules])
+  useEffect(() => {
+    if (!clinicId) return
+    let cancelled = false
+    async function load() {
+      try {
+        const { data, error: fetchError } = await createClient().from('clinic_schedules')
+          .select('*').eq('clinic_id', clinicId).eq('service_date', today()).order('opens_at')
+        if (fetchError) throw fetchError
+        if (!cancelled) setSchedules((data || []) as Schedule[])
+      } catch (caught) {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Unable to load schedules.')
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [clinicId])
 
   const selectedSchedule = useMemo(() => schedules.find((schedule) => schedule.id === scheduleId), [schedules, scheduleId])
 
@@ -99,7 +116,7 @@ export function PatientPortal() {
 
   async function signOut() {
     await createClient().auth.signOut()
-    window.location.assign('/')
+    router.push('/')
   }
 
   if (loading) return <p className="page-state">Loading your queue…</p>

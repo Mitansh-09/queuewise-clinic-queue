@@ -2,12 +2,14 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Appointment, Clinic, Schedule } from '@/lib/types'
 
 const today = () => new Date().toLocaleDateString('en-CA')
 
 export function StaffConsole() {
+  const router = useRouter()
   const [clinics, setClinics] = useState<Clinic[]>([])
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -39,7 +41,7 @@ export function StaffConsole() {
       try {
         const supabase = createClient()
         const { data: identity } = await supabase.auth.getUser()
-        if (!identity.user) { window.location.assign('/login'); return }
+        if (!identity.user) { router.push('/login'); return }
         const { data: memberships, error: membershipError } = await supabase.from('staff_members').select('clinic_id')
         if (membershipError) throw membershipError
         const ids = (memberships || []).map((membership) => membership.clinic_id)
@@ -57,10 +59,40 @@ export function StaffConsole() {
     }
     load()
     return () => { if (channel) createClient().removeChannel(channel) }
-  }, [loadQueue, scheduleId])
+  }, [loadQueue, router, scheduleId])
 
-  useEffect(() => { loadSchedules(clinicId).catch((caught) => setError(caught.message)); setScheduleId('') }, [clinicId, loadSchedules])
-  useEffect(() => { loadQueue(scheduleId).catch((caught) => setError(caught.message)) }, [scheduleId, loadQueue])
+  useEffect(() => {
+    if (!clinicId) return
+    let cancelled = false
+    async function load() {
+      try {
+        const { data, error: schedulesError } = await createClient().from('clinic_schedules').select('*')
+          .eq('clinic_id', clinicId).gte('service_date', today()).order('service_date').order('opens_at')
+        if (schedulesError) throw schedulesError
+        if (!cancelled) setSchedules((data || []) as Schedule[])
+      } catch (caught) {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Unable to load schedules.')
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [clinicId])
+
+  useEffect(() => {
+    if (!scheduleId) return
+    let cancelled = false
+    async function load() {
+      try {
+        const { data, error: queueError } = await createClient().from('appointments').select('*').eq('schedule_id', scheduleId).order('token_number')
+        if (queueError) throw queueError
+        if (!cancelled) setAppointments((data || []) as Appointment[])
+      } catch (caught) {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Unable to load queue.')
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [scheduleId])
 
   const selectedSchedule = useMemo(() => schedules.find((item) => item.id === scheduleId), [schedules, scheduleId])
   const active = appointments.filter((item) => item.status === 'waiting' || item.status === 'serving')
@@ -122,7 +154,7 @@ export function StaffConsole() {
     finally { setWorking(false) }
   }
 
-  async function signOut() { await createClient().auth.signOut(); window.location.assign('/') }
+  async function signOut() { await createClient().auth.signOut(); router.push('/') }
 
   if (loading) return <p className="page-state">Loading the staff console…</p>
   return (
@@ -132,7 +164,7 @@ export function StaffConsole() {
         <header className="portal-title"><div><p className="eyebrow">Front desk and doctor view</p><h1>Run today&apos;s queue</h1></div><Link className="button button-secondary" href="/patient">Patient portal</Link></header>
         {error && <p className="form-message error" role="alert">{error}</p>}{message && <p className="form-message" role="status">{message}</p>}
         {!clinics.length ? <section className="surface setup-note"><h2>Your staff account needs a clinic</h2><p>An administrator needs to add your account to a clinic in the <code>staff_members</code> table. The README contains the exact setup query.</p></section> : <>
-          <section className="surface control-bar"><label>Clinic<select value={clinicId} onChange={(event) => setClinicId(event.target.value)}><option value="">Choose a clinic</option>{clinics.map((clinic) => <option value={clinic.id} key={clinic.id}>{clinic.name}</option>)}</select></label><label>Schedule<select value={scheduleId} onChange={(event) => setScheduleId(event.target.value)} disabled={!clinicId}><option value="">Choose a schedule</option>{schedules.map((schedule) => <option key={schedule.id} value={schedule.id}>{schedule.service_date} · {schedule.doctor_name} · {schedule.opens_at.slice(0, 5)}</option>)}</select></label></section>
+          <section className="surface control-bar"><label>Clinic<select value={clinicId} onChange={(event) => { setClinicId(event.target.value); setScheduleId(''); setSchedules([]); setAppointments([]) }}><option value="">Choose a clinic</option>{clinics.map((clinic) => <option value={clinic.id} key={clinic.id}>{clinic.name}</option>)}</select></label><label>Schedule<select value={scheduleId} onChange={(event) => { setScheduleId(event.target.value); setAppointments([]) }} disabled={!clinicId}><option value="">Choose a schedule</option>{schedules.map((schedule) => <option key={schedule.id} value={schedule.id}>{schedule.service_date} · {schedule.doctor_name} · {schedule.opens_at.slice(0, 5)}</option>)}</select></label></section>
           {selectedSchedule && <section className="queue-board"><div className="queue-summary"><p>Today&apos;s session</p><h2>{selectedSchedule.doctor_name}</h2><span>{selectedSchedule.opens_at.slice(0, 5)} to {selectedSchedule.closes_at.slice(0, 5)} · {selectedSchedule.last_token}/{selectedSchedule.capacity} tokens issued</span><button className="button button-secondary" onClick={toggleTokens} disabled={working}>{selectedSchedule.accepting_tokens ? 'Close new tokens' : 'Open new tokens'}</button></div><div className="now-serving"><p>Now serving</p><strong>{serving ? serving.token_number : 'None'}</strong><span>{serving ? serving.patient_name : 'No patient in consultation'}</span><button className="button button-primary" onClick={nextPatient} disabled={working}>{serving ? 'Complete and call next' : 'Call next patient'}</button></div></section>}
           {selectedSchedule && <section className="surface queue-table"><div className="section-heading"><h2>Waiting tokens</h2><span>{waiting.length} waiting</span></div>{waiting.length === 0 ? <p className="empty-state">There are no waiting tokens for this session.</p> : <div>{waiting.map((appointment) => <article className="staff-token" key={appointment.id}><strong>{appointment.token_number}</strong><div><h3>{appointment.patient_name}</h3><p>{appointment.phone}</p></div><button className="text-action" disabled={working} onClick={() => markNoShow(appointment.id)}>Mark no-show</button></article>)}</div>}</section>}
           <section className="surface schedule-form"><div><p className="eyebrow">Schedule management</p><h2>Create or update a doctor session</h2><p>Saving the same doctor and date updates that session and reopens token booking.</p></div><form onSubmit={createSchedule} className="schedule-fields"><label>Doctor name<input name="doctorName" required minLength={2} /></label><label>Date<input name="serviceDate" type="date" required min={today()} defaultValue={today()} /></label><label>Opens<input name="opensAt" type="time" required defaultValue="09:00" /></label><label>Closes<input name="closesAt" type="time" required defaultValue="13:00" /></label><label>Average minutes<input name="averageMinutes" type="number" required min="2" max="90" defaultValue="10" /></label><label>Token capacity<input name="capacity" type="number" required min="1" max="200" defaultValue="30" /></label><button className="button button-primary" disabled={working}>Save session</button></form></section>

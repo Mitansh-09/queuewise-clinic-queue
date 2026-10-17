@@ -1,12 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 type Mode = 'login' | 'register'
 
 export function AuthForm({ mode }: { mode: Mode }) {
+  const router = useRouter()
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -25,7 +27,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       if (mode === 'login') {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
         if (signInError) throw signInError
-        window.location.assign('/patient')
+        router.push('/patient')
         return
       }
 
@@ -40,7 +42,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       if (!data.session) {
         setMessage('Check your email to confirm the account, then return here to sign in.')
       } else {
-        window.location.assign('/patient')
+        router.push('/patient')
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Something went wrong. Please try again.')
