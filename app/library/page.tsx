@@ -11,21 +11,36 @@ const topics = [
   { name: 'High blood pressure', group: 'Heart health', href: 'https://medlineplus.gov/highbloodpressure.html', summary: 'Understand blood pressure, possible health effects, measurement, and treatment.' },
 ]
 
+type SearchTopic = { title: string; group: string; points: string[]; url: string }
+
 export default function HealthLibraryPage() {
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
+  const [results, setResults] = useState<SearchTopic[]>([])
+  const [loading, setLoading] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
 
-  function search(event: FormEvent<HTMLFormElement>) {
+  async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const term = query.trim()
     if (term.length < 2) {
       setError('Type at least two letters to search health topics.')
       return
     }
-    const url = new URL('https://connect.medlineplus.gov/application')
-    url.searchParams.set('mainSearchCriteria.v.dn', term)
-    url.searchParams.set('informationRecipient.languageCode.c', 'en')
-    window.location.assign(url.toString())
+    setError('')
+    setLoading(true)
+    setResults([])
+    setHasSearched(true)
+    try {
+      const response = await fetch(`/api/health-library?term=${encodeURIComponent(term)}`)
+      const payload = await response.json() as { topics?: SearchTopic[]; error?: string }
+      if (!response.ok) throw new Error(payload.error || 'Health topics could not be loaded.')
+      setResults(payload.topics || [])
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Health topics could not be loaded. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return <main className="library-page"><div className="shell"><SiteHeader />
@@ -35,11 +50,17 @@ export default function HealthLibraryPage() {
       <p>Search health topics through MedlinePlus, a service of the US National Library of Medicine, or start with these common topics. Information is educational and cannot tell you what condition you have.</p>
       <form className="library-search" onSubmit={search}>
         <label htmlFor="health-topic-search">Search a disease or health topic</label>
-        <div><input id="health-topic-search" value={query} onChange={(event) => { setQuery(event.target.value); setError('') }} placeholder="For example, breast cancer" maxLength={120} /><button className="button button-primary" type="submit">Search MedlinePlus</button></div>
-        <p className="library-privacy">Your search opens MedlinePlus. The search term is sent to that service so it can return relevant public health information. Do not enter personal details or symptoms that identify you.</p>
+        <div><input id="health-topic-search" value={query} onChange={(event) => { setQuery(event.target.value); setError(''); setResults([]); setHasSearched(false) }} placeholder="For example, diabetes" maxLength={120} /><button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search topics'}</button></div>
+        <p className="library-privacy">MedVault sends this topic search to MedlinePlus to retrieve public information. It is not saved to your MedVault account. Avoid entering names, personal details, or identifying symptoms.</p>
         {error && <p className="form-message error" role="alert">{error}</p>}
       </form>
     </section>
+
+    {(loading || hasSearched) && <section className="library-results" aria-live="polite" aria-labelledby="library-results-heading">
+      <div className="library-section-heading"><div><p className="eyebrow">MedlinePlus search</p><h2 id="library-results-heading">{loading ? 'Finding health topics…' : error ? 'Could not load topics' : results.length ? 'Health information' : 'No matching topics found'}</h2></div><p>Short summaries from the National Library of Medicine. Select a source only if you want more detail.</p></div>
+      {results.length > 0 && <div className="library-results-list">{results.map((topic) => <article className="library-result-card" key={topic.url}><div className="library-result-heading"><p className="eyebrow">{topic.group}</p><h3>{topic.title}</h3></div>{topic.points.length > 0 ? <ul>{topic.points.map((point, index) => <li key={`${topic.url}-${index}`}>{point}</li>)}</ul> : <p>This source has more information on the topic. Open it to read the overview.</p>}<p className="library-result-source">Source: MedlinePlus, National Library of Medicine</p><a className="text-action" href={topic.url} target="_blank" rel="noreferrer">Read more at source</a></article>)}</div>}
+      {!loading && results.length === 0 && !error && <p className="library-no-results">Try a broader or more common topic name. No summary is created when the source does not return a match.</p>}
+    </section>}
 
     <section className="library-section" aria-labelledby="starter-topics">
       <div className="library-section-heading"><div><p className="eyebrow">Browse</p><h2 id="starter-topics">Common starting points</h2></div><p>For more conditions, use the MedlinePlus search above. Its health topics are maintained by the National Library of Medicine.</p></div>

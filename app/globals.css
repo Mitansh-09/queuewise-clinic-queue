@@ -245,6 +245,16 @@ input, select { border-radius: 3px; }
 .library-search > div { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .library-search input { min-height: 48px; }
 .library-privacy { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.library-results { padding: 32px 0 54px; border-top: 1px solid var(--line); }
+.library-results-list { display: grid; gap: 12px; margin-top: 22px; }
+.library-result-card { padding: 22px 24px; background: var(--surface); border: 1px solid var(--line); }
+.library-result-heading .eyebrow { margin-bottom: 5px; font-size: 10px; }
+.library-result-heading h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 500; letter-spacing: -.025em; }
+.library-result-card ul { display: grid; gap: 8px; padding-left: 19px; margin: 16px 0; }
+.library-result-card li { color: #4f5d57; font-size: 14px; line-height: 1.65; }
+.library-result-source { margin: 17px 0 8px; color: var(--muted); font-size: 11px; }
+.library-result-card .text-action { color: var(--forest); }
+.library-no-results { padding: 20px; margin: 18px 0 0; color: var(--muted); background: #fffefa; border: 1px solid var(--line); font-size: 14px; }
 .library-section { padding: 48px 0 68px; border-top: 1px solid var(--line); }
 .library-section-heading { display: flex; justify-content: space-between; align-items: end; gap: 30px; }
 .library-section-heading h2, .library-feature h2 { margin-bottom: 0; font-family: Georgia, "Times New Roman", serif; font-size: 36px; font-weight: 500; letter-spacing: -.04em; }
@@ -303,6 +313,7 @@ input, select { border-radius: 3px; }
   .library-search { padding: 17px; }
   .library-search > div { grid-template-columns: 1fr; }
   .library-search .button { width: 100%; }
+  .library-result-card { padding: 18px; }
   .library-section { padding: 38px 0 46px; }
   .library-section-heading h2 { font-size: 31px; }
   .library-grid { grid-template-columns: 1fr; }
