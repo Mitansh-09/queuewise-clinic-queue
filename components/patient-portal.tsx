@@ -46,7 +46,7 @@ export function PatientPortal() {
   }, [])
 
   useEffect(() => {
-    let channelName = ''
+    let channel: ReturnType<ReturnType<typeof createClient>['channel']> | undefined
     async function load() {
       try {
         const supabase = createClient()
@@ -56,8 +56,7 @@ export function PatientPortal() {
         if (clinicsError) throw clinicsError
         setClinics((data || []) as Clinic[])
         await refreshAppointments()
-        channelName = `patient-queue-${userData.user.id}`
-        supabase.channel(channelName).on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        channel = supabase.channel(`patient-queue-${userData.user.id}`).on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
           refreshAppointments().catch(() => undefined)
         }).subscribe()
       } catch (caught) {
@@ -67,7 +66,7 @@ export function PatientPortal() {
       }
     }
     load()
-    return () => { if (channelName) createClient().removeChannel(createClient().channel(channelName)) }
+    return () => { if (channel) createClient().removeChannel(channel) }
   }, [refreshAppointments])
 
   useEffect(() => { loadSchedules(clinicId).catch((caught) => setError(caught.message)) }, [clinicId, loadSchedules])
