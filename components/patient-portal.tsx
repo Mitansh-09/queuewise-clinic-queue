@@ -52,6 +52,10 @@ export function PatientPortal() {
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>['channel']> | undefined
+    const loadTimeout = window.setTimeout(() => {
+      setError('The clinic queue is taking longer than expected to load. Check your connection, then try again.')
+      setLoading(false)
+    }, 12000)
     async function load() {
       try {
         const supabase = createClient()
@@ -74,11 +78,15 @@ export function PatientPortal() {
       } catch (caught) {
         setError(caught instanceof Error ? caught.message : 'Unable to load your account.')
       } finally {
+        window.clearTimeout(loadTimeout)
         setLoading(false)
       }
     }
     load()
-    return () => { if (channel) createClient().removeChannel(channel) }
+    return () => {
+      window.clearTimeout(loadTimeout)
+      if (channel) createClient().removeChannel(channel)
+    }
   }, [refreshAppointments, router])
 
   useEffect(() => {
@@ -159,7 +167,7 @@ export function PatientPortal() {
       <aside className="portal-side"><Link className="wordmark" href="/"><span className="wordmark-mark" />MedVault</Link><p>Patient portal</p><button className="link-button" onClick={signOut}>Sign out</button></aside>
       <main className="portal-main">
         <header className="portal-title"><div><p className="eyebrow">Patient portal</p><h1>Your clinic queue</h1></div><Link className="button button-secondary" href="/staff">Clinic staff</Link></header>
-        {error && <p className="form-message error" role="alert">{error}</p>}
+        {error && <div className="form-message error" role="alert"><p>{error}</p><button className="text-action" type="button" onClick={() => window.location.reload()}>Try again</button></div>}
         {message && <p className="form-message" role="status">{message}</p>}
         <section className="portal-grid">
           <div className="surface booking-surface"><h2>Book today&apos;s token</h2><p>One active token is allowed for each clinic session.</p>
