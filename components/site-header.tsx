@@ -15,7 +15,7 @@ export function SiteHeader() {
       </nav>
       <details className="site-menu">
         <summary aria-label="Open navigation menu"><span>Menu</span><i aria-hidden="true" /></summary>
-        <nav aria-label="Mobile navigation">
+        <nav className="site-menu-links" aria-label="Mobile navigation">
           <Link href="/health">My health</Link>
           <Link href="/library">Health library</Link>
           <Link href="/care-guide">Care guide</Link>

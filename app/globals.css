@@ -1,4 +1,4 @@
-Warning: truncated output (original token count: 10839)
+Warning: truncated output (original token count: 10842)
 Total output lines: 436
 
 :root { --ink: #1d2927; --muted: #66726f; --line: #d7ddd8; --paper: #f8f7f2; --surface: #ffffff; --forest: #14342e; --forest-soft: #e2ece7; --clay: #b85d2a; --danger: #a83028; --shadow: 0 12px 32px rgba(20, 52, 46, .08); }
@@ -155,7 +155,7 @@ input, select { border-radius: 3px; }
 .health-topbar nav { gap: clamp(12px, 2.5vw, 28px); flex-wrap: wrap; }
 .health-topbar nav a { font-size: 13px; font-weight: 650; }
 .health-content, .directory-content { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 54px 0 70px; }
-.health-heading { display: flex; align-items: end; jus…839 tokens truncated…x; padding: 16px 18px; background: #fffefa; border: 1px solid var(--line); }
+.health-heading { display: flex; align-items: end; jus…842 tokens truncated…6px 18px; background: #fffefa; border: 1px solid var(--line); }
 .add-profile-details summary { cursor: pointer; color: var(--forest); font-size: 14px; font-weight: 700; }
 .health-form-inline { grid-template-columns: 1fr 1fr 1fr auto; align-items: end; }
 .health-form-inline .button { width: max-content; }
@@ -278,7 +278,7 @@ input, select { border-radius: 3px; }
 .site-menu nav a { padding: 11px 10px; color: var(--ink); font-size: 13px; }
 .site-menu nav a + a { border-top: 1px solid #edf0eb; }
 .site-menu nav a:hover { color: var(--clay); background: #f5f5ef; }
-.site-menu[open] nav a { display: block; }
+.site-menu[open] .site-menu-links a { display: block; }
 .site-menu summary:focus-visible { outline: 3px solid #bf7447; outline-offset: 3px; }
 @media (max-width: 760px) {
   .site-header > nav { display: none; }
