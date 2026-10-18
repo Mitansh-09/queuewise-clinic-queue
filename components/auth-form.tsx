@@ -7,9 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 
 type Mode = 'login' | 'register'
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, confirmed = false }: { mode: Mode; confirmed?: boolean }) {
   const router = useRouter()
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(confirmed && mode === 'login' ? 'Your email is confirmed. Sign in to continue.' : '')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -35,14 +35,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
       const displayName = String(form.get('displayName') || '').trim()
       if (displayName.length < 2) throw new Error('Enter the name you would like the clinic to use.')
+      const confirmationUrl = new URL('/login', 'https://medvault-health.vercel.app')
+      confirmationUrl.searchParams.set('confirmed', '1')
+      if (destination !== '/health') confirmationUrl.searchParams.set('next', destination)
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { display_name: displayName }, emailRedirectTo: `${window.location.origin}${destination}` },
+        options: { data: { display_name: displayName }, emailRedirectTo: confirmationUrl.toString() },
       })
       if (signUpError) throw signUpError
       if (!data.session) {
-        setMessage('Check your email to confirm the account, then return here to sign in.')
+        setMessage('Check your email for a confirmation link. After confirming, you will return to the MedVault sign-in page.')
       } else {
         router.push(destination)
       }
