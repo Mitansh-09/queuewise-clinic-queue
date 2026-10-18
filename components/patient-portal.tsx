@@ -171,6 +171,7 @@ export function PatientPortal() {
         {message && <p className="form-message" role="status">{message}</p>}
         <section className="portal-grid">
           <div className="surface booking-surface"><h2>Book today&apos;s token</h2><p>One active token is allowed for each clinic session.</p>
+            {clinics.length === 0 ? <div className="empty-state"><p>No clinics have been set up yet, so there are no doctors or sessions to book.</p><p>Clinic administrator? <Link href="/staff">Set up a clinic</Link>. Patients can return here once a clinic publishes its schedule.</p></div> :
             <form onSubmit={book} className="stack-form">
               <label>Clinic<select value={clinicId} onChange={(event) => { setClinicId(event.target.value); setScheduleId(''); setPreferredDoctor('') }} required><option value="">Choose a clinic</option>{clinics.map((clinic) => <option value={clinic.id} key={clinic.id}>{clinic.name}</option>)}</select></label>
               <label>Doctor and time<select value={scheduleId} onChange={(event) => setScheduleId(event.target.value)} required disabled={!clinicId}><option value="">Choose today&apos;s session</option>{schedules.filter((schedule) => schedule.service_date === today()).map((schedule) => <option key={schedule.id} value={schedule.id} disabled={!schedule.accepting_tokens}>{schedule.doctor_name} · {schedule.opens_at.slice(0, 5)} to {schedule.closes_at.slice(0, 5)} {!schedule.accepting_tokens ? '(closed)' : ''}</option>)}</select></label>
@@ -179,7 +180,7 @@ export function PatientPortal() {
               <label>Mobile number<input name="phone" required inputMode="tel" minLength={7} maxLength={20} /></label>
               <label>What would you like the doctor to know? (optional)<textarea name="visitReason" maxLength={500} rows={3} placeholder="Share only what you want the clinic team to see" /></label>
               <button className="button button-primary" disabled={booking}>{booking ? 'Booking token' : 'Book token'}</button>
-            </form>
+            </form>}
           </div>
           <div className="surface"><h2>My tokens</h2>{appointments.length === 0 ? <p className="empty-state">You do not have a token yet. Book one for an available clinic session.</p> : <div className="appointment-list">{appointments.map((appointment) => {
             const status = queueStatuses[appointment.id]
