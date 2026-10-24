@@ -151,6 +151,9 @@ input, select { border-radius: 3px; }
 .health-topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 clamp(20px, 5vw, 76px); background: #fffefa; border-bottom: 1px solid var(--line); }
 .health-topbar nav { gap: clamp(12px, 2.5vw, 28px); flex-wrap: wrap; }
 .health-topbar nav a { font-size: 13px; font-weight: 650; }
+.health-signout { min-height: 42px; padding: 9px 14px; color: var(--forest); background: transparent; border: 1px solid #8ba39a; border-radius: 3px; font-size: 13px; font-weight: 750; white-space: nowrap; }
+.health-signout:hover { background: var(--forest-soft); }
+.health-signout:focus-visible { outline: 3px solid #bf7447; outline-offset: 3px; }
 .health-content, .directory-content { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 54px 0 70px; }
 .health-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; margin-bottom: 28px; }
 .health-heading h1, .directory-content h1, .guide-content h1 { margin-bottom: 12px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(40px, 5vw, 60px); font-weight: 500; letter-spacing: -.05em; line-height: 1; }
